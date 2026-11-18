@@ -163,7 +163,7 @@ function migrate(s){s=s&&s.tasks?s:defaults();s.ratio=1;s.fixedDraws=s.fixedDraw
   if(!s.fixedSeed1){s.fixedDraws['2026-11-18']=7;s.fixedSeed1=true}if(!s.tiktok14)s.tiktok14='2028-03-24';
   if(!s.openSet){s.money.push({id:uid(),ts:Date.now(),name:'יתרת פתיחה – הכסף של בן אצל אבא',amt:2260,icon:'💰'});s.openSet=true}
   ['ledger','money','requests','dreams','surprises','tasks','rewards'].forEach(k=>s[k]=s[k]||[]);
-  if(s.allowAmt==null)s.allowAmt=100;if(!s.allowDone)s.allowDone=monKey(new Date());return s}
+  if(s.allowAmt==null)s.allowAmt=100;if(!s.allowDone)s.allowDone='2026-11';return s}
 const monKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 // דמי כיס: בכל 1 לחודש נכנס סכום קבוע לקופה. מזהה קבוע לכל חודש כדי ששני מכשירים לא יכפילו
 function allowance(){if(!S||!num(S.allowAmt))return;const now=new Date(),cur=monKey(now);if(!S.allowDone||S.allowDone>=cur)return;
