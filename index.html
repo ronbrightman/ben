@@ -11,7 +11,7 @@
 :root{--bg:#08142e;--card:#0f2149;--card2:#152c5e;--line:#22427e;--lime:#6cabdd;--cyan:#bfe2ff;--orange:#ffc845;--red:#ff5a6e;--txt:#f4f8ff;--mut:#93a9d6}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--txt);font-family:Rubik,system-ui,sans-serif;font-size:15px}
-body{min-height:100dvh;background:radial-gradient(circle at 50% 60%,transparent 0 118px,#ffffff40 119px 122px,transparent 123px),linear-gradient(180deg,transparent calc(60% - 1.5px),#ffffff40 calc(60% - 1.5px) calc(60% + 1.5px),transparent calc(60% + 1.5px)),repeating-linear-gradient(180deg,#2f8b3c 0 56px,#277a33 56px 112px);background-attachment:fixed}
+body{min-height:100dvh;background:radial-gradient(120% 55% at 50% 0,#1f4f8f88 0,transparent 65%),radial-gradient(circle at 50% 62%,transparent 0 118px,#6cabdd14 119px 121px,transparent 122px),repeating-linear-gradient(180deg,#ffffff06 0 56px,transparent 56px 112px),var(--bg);background-attachment:fixed}
 button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
 input,textarea,select{font-family:inherit;font-size:16px;color:var(--txt);background:#0a1838;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--cyan)}
@@ -282,7 +282,7 @@ home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
   <div class="bal"><small>⚽ היתרה שלי</small><div class="big">${fN(p)} <span>נק'</span></div>
   <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
   <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
-  <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'פנדל יומי – הגרלה!'}</button>
+  <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:`פנדל יומי – הגרלה!<small style="display:block;font-size:14px;font-weight:700;margin-top:2px">⏳ נשאר עד חצות: <span class="cdn" style="font-variant-numeric:tabular-nums">${toMidnight()}</span></small>`}</button>
   <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['dreams','🏆','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
 tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
   return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
