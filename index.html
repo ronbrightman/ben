@@ -163,6 +163,8 @@ function migrate(s){s=s&&s.tasks?s:defaults();s.ratio=1;s.fixedDraws=s.fixedDraw
   if(!s.fixedSeed1){s.fixedDraws['2026-11-18']=7;s.fixedSeed1=true}if(!s.tiktok14)s.tiktok14='2028-03-24';
   if(!s.openSet){s.money.push({id:uid(),ts:Date.now(),name:'יתרת פתיחה – הכסף של בן אצל אבא',amt:2260,icon:'💰'});s.openSet=true}
   ['ledger','money','requests','dreams','surprises','tasks','rewards'].forEach(k=>s[k]=s[k]||[]);
+  s.dreams.filter(d=>d.ok!==false).forEach(d=>{if(!s.rewards.some(r=>r.id===d.id))s.rewards.push({id:d.id,icon:d.icon&&d.icon!=='🚀'?d.icon:'🎁',name:d.name,desc:d.notes||'',pts:num(d.target),unit:'',calc:d.calc})});
+  s.dreams=s.dreams.filter(d=>d.ok===false);
   if(s.allowAmt==null)s.allowAmt=100;if(!s.allowDone)s.allowDone='2026-11';return s}
 const monKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 // דמי כיס: בכל 1 לחודש נכנס סכום קבוע לקופה. מזהה קבוע לכל חודש כדי ששני מכשירים לא יכפילו
@@ -275,7 +277,7 @@ function boom(){
   const t0=performance.now();(function f(t){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});t-t0<3000?requestAnimationFrame(f):c.remove()})(t0)}
 
 /* ============ nav ============ */
-const NAV=[['home','🏟️','בית'],['tasks','⚽','משימות'],['shop','👕','חנות'],['dreams','🏆','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
+const NAV=[['home','🏟️','בית'],['tasks','⚽','משימות'],['shop','👕','חנות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
 function go(r){if(r==='admin'&&!admin){pinGate();return}route=r;render();scrollTo(0,0)}
 function renderNav(){$('#nav').innerHTML=NAV.map(([k,i,t])=>`<button class="${route===k?'on':''}" data-go="${k}"><span>${i}</span>${t}</button>`).join('');
   $('#chip').innerHTML=admin?`<button data-act="lock">🔓 מצב אבא פעיל · לחץ לנעילה</button>`:''}
@@ -295,17 +297,15 @@ home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
   <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
   <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המרה נקודות ⇄ כסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
   <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'פנדל יומי – הגרלה!'}</button>
-  <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['dreams','🏆','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
+  <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile" data-act="dreamnew"><span>🏆</span>בקשה לחנות</button><button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
 tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
   return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
 shop(){const p=PTS();
   return `<h1 class="page">חנות האוהדים 👕</h1><div class="note" style="margin-top:-6px">יש לך <b style="color:var(--lime)">${fN(p)} נק'</b> לבזבז. בוחרים, הנקודות יורדות מיד, וזה שלך!</div>
-  ${S.rewards.length?`<div class="cards">${S.rewards.map(r=>`<div class="card ${p<r.pts?'no':''}"><div class="ce">${r.icon}</div><b>${esc(r.name)}</b><small>${esc(r.desc||'')}${r.tag==='tiktok'?`<br><span style="color:var(--cyan)">${esc(tiktokInfo())}</span>`:''}</small><div class="cf"><span class="p">${fN(r.pts)} נק'${perTxt(r)}</span><button class="btn sm cy" data-act="buy" data-id="${r.id}">אני רוצה!</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">החנות ריקה כרגע. אבא, תמלא מדפים 😉</div></div>`}
+  <button class="btn" style="margin-bottom:12px" data-act="dreamnew">🏆 רוצה משהו שאין בחנות? בקש מאבא</button>
+  ${S.dreams.length?`<h2 style="margin-top:0">⏳ מחכה שאבא יקבע מחיר</h2><div class="list" style="margin-bottom:12px">${S.dreams.slice().sort((a,b)=>b.ts-a.ts).map(d=>`<div class="li"><div class="ic">${d.icon||'🎁'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)} · הצעת: ${fN(d.target)} נק'</small></div><span class="badge b-wait">ממתין</span><div class="acts"><button data-act="ddel" data-id="${d.id}">🗑️</button></div></div>`).join('')}</div>`:''}
+  ${S.rewards.length?`<div class="cards">${S.rewards.map(r=>`<div class="card ${p<r.pts?'no':''}"><div class="ce">${r.icon}</div><b>${esc(r.name)}</b><small>${esc(r.desc||'')}${r.tag==='tiktok'?`<br><span style="color:var(--cyan)">${esc(tiktokInfo())}</span>`:''}</small><div class="cf"><span class="p">${fN(r.pts)} נק'${perTxt(r)}</span><span style="display:flex;gap:4px">${r.unit||num(r.pts)<50?'':`<button class="btn sm" data-act="calc" data-id="${r.id}" title="מחשבון חיסכון">🧮</button>`}<button class="btn sm cy" data-act="buy" data-id="${r.id}">אני רוצה!</button></span></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">החנות ריקה כרגע. אבא, תמלא מדפים 😉</div></div>`}
   ${pendingList(['reward'])}`},
-dreams(){return `<h1 class="page">הדרך היחידה להגשים חלום היא להתעורר ולעבוד עליו!</h1>
-  <button class="btn cy" style="min-height:56px;font-size:17px" data-act="dreamnew">🏆 אני רוצה להתעורר!</button>
-  <h2>החלומות שלי</h2>${S.dreams.length?`<div class="list">${S.dreams.slice().sort((a,b)=>b.ts-a.ts).map(d=>{const h=dreamHave(d),pc=Math.min(100,d.target?h/d.target*100:0);
-    return `<div class="li"><div class="ic">${d.icon||'🚀'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)} · ${d.ok===false?'<span class="badge b-wait">ממתין לאישור מחיר</span>':Math.round(pc)+'%'}</small><div class="prog"><i style="width:${pc}%"></i></div></div><span class="v">${fN(d.target)} נק'</span><div class="acts"><button data-act="calc" data-id="${d.id}">🧮</button><button data-act="dedit" data-id="${d.id}">✏️</button><button data-act="ddel" data-id="${d.id}">🗑️</button></div></div>`}).join('')}</div>`:`<div class="list"><div class="empty">אין עדיין חלומות. על מה אתה חולם? 💭</div></div>`}`},
 history(){const all=S.ledger.concat(S.money.map(x=>Object.assign({},x,{isM:1})));const mb=monthBtn('history',all,'pts');
   return `<h1 class="page">היסטוריה 📜</h1><div class="note" style="margin-top:-6px">כל התנועות: נקודות וכסף בקופה</div><div class="row2"><button class="btn or" data-act="bonus">⭐ + בונוס</button>${mb.html}</div><h2>${mb.m.label}</h2>${ledgerRows(mb.m.items,'hist')}`},
 bank(){const mb=monthBtn('bank',S.money,'₪');
@@ -317,13 +317,13 @@ bank(){const mb=monthBtn('bank',S.money,'₪');
   ${mb.m.items.length?`<div class="list">${mb.m.items.map(x=>`<div class="li"><div class="ic">${x.icon||'💵'}</div><div class="t"><b>${esc(x.name)}</b><small>${fD(x.ts)}${x.by?' · נרשם ע"י '+x.by:''}${x.note?' · '+esc(x.note):''}</small></div><span class="v ${x.amt>=0?'plus':'minus'}">₪${fN(x.amt)}</span><div class="acts"><button data-act="medit" data-id="${x.id}">✏️</button><button data-act="mdel" data-id="${x.id}">🗑️</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">אין תנועות בחודש הזה</div></div>`}`},
 admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
   const dp=S.dreams.filter(d=>d.ok===false).length;
-  const tabs=[['adjust','± יתרות'],['dreams',`חלומות${dp?' ('+dp+')':''}`],['tasks','משימות'],['rewards','חנות'],['surprises','הגרלה'],['settings','הגדרות']];
+  const tabs=[['adjust','± יתרות'],['dreams',`בקשות${dp?' ('+dp+')':''}`],['tasks','משימות'],['rewards','חנות'],['surprises','הגרלה'],['settings','הגדרות']];
   let body='';
   if(adminTab==='approve'){const r=S.requests.slice().sort((a,b)=>(a.status==='pending'?0:1)-(b.status==='pending'?0:1)||b.ts-a.ts).slice(0,40);
     const K={task:'משימה',reward:'חנות',surprise:'הגרלה',convert:'המרה לכסף'};
     body=r.length?`<div class="list">${r.map(x=>`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${K[x.kind]} · ${fD(x.ts)}${x.kind==='convert'?` · ₪${fN(x.amt)}`:''}</small></div><span class="v ${x.kind==='reward'||x.kind==='convert'?'minus':'plus'}">${x.pts?(x.kind==='reward'||x.kind==='convert'?'-':'+')+fN(x.pts):''}</span>${x.status==='pending'?`<div class="acts"><button data-act="ok" data-id="${x.id}" title="אושר">✅</button><button data-act="no" data-id="${x.id}" title="לא אושר">❌</button></div>`:`<span class="badge ${x.status==='approved'?'b-ok':'b-no'}">${x.status==='approved'?'אושר':'נדחה'}</span>`}</div>`).join('')}</div>`:`<div class="list"><div class="empty">אין בקשות. שקט חשוד... 🕵️</div></div>`}
-  if(adminTab==='dreams'){const L=S.dreams.slice().sort((a,b)=>(a.ok===false?0:1)-(b.ok===false?0:1)||b.ts-a.ts);
-    body=`<div class="note">חלומות חדשים שבן הציע מחכים לאישור התמחור. ✅ מאשר, ✏️ משנה מחיר ומאשר, ❌ לא מאשר.</div><div class="list">${L.length?L.map(d=>`<div class="li"><div class="ic">${d.icon||'🚀'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)}${d.notes?' · '+esc(d.notes):''}</small></div><span class="v">${fN(d.target)} נק'</span>${d.ok===false?`<div class="acts"><button data-act="dok" data-id="${d.id}">✅</button><button data-act="dprice" data-id="${d.id}">✏️</button><button data-act="dno" data-id="${d.id}">❌</button></div>`:`<span class="badge b-ok">מאושר</span>`}</div>`).join(''):'<div class="empty">אין חלומות עדיין</div>'}</div>`}
+  if(adminTab==='dreams'){const L=S.dreams.slice().sort((a,b)=>b.ts-a.ts);
+    body=`<div class="note">דברים שבן ביקש להוסיף לחנות. ✅ מאשר במחיר שהציע, ✏️ קובע מחיר אחר ומאשר, ❌ לא מאשר. אחרי אישור זה נכנס לחנות.</div><div class="list">${L.length?L.map(d=>`<div class="li"><div class="ic">${d.icon||'🚀'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)}${d.notes?' · '+esc(d.notes):''}</small></div><span class="v">${fN(d.target)} נק'</span>${d.ok===false?`<div class="acts"><button data-act="dok" data-id="${d.id}">✅</button><button data-act="dprice" data-id="${d.id}">✏️</button><button data-act="dno" data-id="${d.id}">❌</button></div>`:`<span class="badge b-ok">מאושר</span>`}</div>`).join(''):'<div class="empty">אין בקשות חדשות</div>'}</div>`}
   if(adminTab==='tasks'||adminTab==='rewards'){const L=S[adminTab];
     body=`<button class="btn pri" data-act="anew">+ ${adminTab==='tasks'?'משימה':'פרס'} חדש${adminTab==='tasks'?'ה':''}</button><div class="list" style="margin-top:10px">${L.length?L.map(x=>`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${esc(x.desc||'')}</small></div><span class="v ${adminTab==='tasks'?'plus':''}">${fN(x.pts)} נק'${perTxt(x)}</span><div class="acts"><button data-act="aedit" data-id="${x.id}">✏️</button><button data-act="adel" data-id="${x.id}">🗑️</button></div></div>`).join(''):'<div class="empty">הרשימה ריקה</div>'}</div>`}
   if(adminTab==='surprises'){const F=Object.entries(S.fixedDraws||{}).sort();body=`<button class="btn pri" data-act="snew">+ הפתעה חדשה</button>
@@ -349,11 +349,11 @@ function render(){renderNav();$('#view').innerHTML=`<div id="netbar" class="pill
 function taskById(id){return S.tasks.find(t=>t.id===id)}
 function dreamHave(d,c){c=c||d.calc||{};const tasksP=Object.entries(c.counts||{}).reduce((a,[id,n])=>a+(taskById(id)?taskById(id).pts*n:0),0);
   return Math.max(0,PTS())+tasksP+num(c.dad)+num(c.mom)}
-function openCalc(d){const c=JSON.parse(JSON.stringify(d.calc||{dad:0,mom:0,counts:{}}));c.counts=c.counts||{};
-  const ov=modal(`<h3>מחשבון חלומות</h3>
+function openCalc(d){const T=num(d.pts),c=JSON.parse(JSON.stringify(d.calc||{dad:0,mom:0,counts:{}}));c.counts=c.counts||{};
+  const ov=modal(`<h3>מחשבון חיסכון 🧮</h3>
   <div class="sum">
-   <div class="r"><span>החלום שלי</span><b>${esc(d.name)}</b></div>
-   <div class="r"><span>מחיר היעד</span><b>${fN(d.target)} נק'</b></div>
+   <div class="r"><span>מה אני רוצה</span><b>${esc(d.name)}</b></div>
+   <div class="r"><span>המחיר</span><b>${fN(T)} נק'</b></div>
    <div class="r"><span>הנקודות שלי</span><b>${fN(Math.max(0,PTS()))} נק'</b></div>
    <div class="r"><span>משימות מתוכננות</span><b id="cT"></b></div>
    <div class="r"><span>אבא יצ'פר (נק')</span><input id="cD" inputmode="decimal" value="${c.dad||''}" placeholder="0"></div>
@@ -368,9 +368,9 @@ function openCalc(d){const c=JSON.parse(JSON.stringify(d.calc||{dad:0,mom:0,coun
   const D=ov.querySelector('#cD'),M=ov.querySelector('#cM');
   const upd=()=>{c.dad=num(D.value);c.mom=num(M.value);const tp=Object.entries(c.counts).reduce((a,[id,n])=>a+(taskById(id)?taskById(id).pts*n:0),0);
     ov.querySelector('#cT').textContent=`${fN(tp)} נק'`;const h=dreamHave(d,c);ov.querySelector('#cH').textContent=fN(h)+' נק\'';
-    const x=Math.max(0,d.target-h);ov.querySelector('#cX').textContent=x?fN(x)+' נק\'':'כלום! 🎉 החלום בהישג יד';};
+    const x=Math.max(0,T-h);ov.querySelector('#cX').textContent=x?fN(x)+' נק\'':'כלום! 🎉 זה בהישג יד';};
   D.addEventListener('input',upd);M.addEventListener('input',upd); // עדכון בלי לרנדר מחדש — אפשר להקליד כמה ספרות ברצף
-  ov.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const T=num(d.target),v=b.dataset.q==='half'?T/4:T/3;D.value=M.value=Math.round(v*100)/100;upd()}); // מחושב ממחיר היעד, לא מהיתרה
+  ov.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const v=b.dataset.q==='half'?T/4:T/3;D.value=M.value=Math.round(v*100)/100;upd()}); // מחושב ממחיר היעד, לא מהיתרה
   ov.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{const id=b.dataset.id;c.counts[id]=Math.max(0,(c.counts[id]||0)+num(b.dataset.c));ov.querySelector('#n_'+id).textContent=c.counts[id];upd()});
   ov.querySelector('[data-sv]').onclick=()=>{upd();d.calc=c;save();ov.remove();render()};
   upd()}
@@ -451,13 +451,16 @@ document.addEventListener('click',e=>{
   case'moneyadd':form('± תנועה בקופה',[{label:'סוג',type:'select',val:'in',opts:[{v:'in',t:'💵 הפקדה (מתנה, דמי כיס...)'},{v:'out',t:'🛍️ משיכה / קנייה'}]},{label:'תיאור',val:'',req:true},{label:'סכום ₪',val:'',num:true,req:true},{label:'הערות',val:'',type:'area'}],v=>{S.money.push({id:uid(),ts:Date.now(),name:v[1],amt:v[0]==='out'?-Math.abs(v[2]):Math.abs(v[2]),icon:v[0]==='out'?'🛍️':'💵',note:v[3],by:admin?'אבא':'בן'})},'שמור');break;
   case'medit':{const x=S.money.find(y=>y.id===id);if(!x)break;if(guard('לערוך את הבנק של עצמך? יצירתי, אבל חסום!'))form('עריכת תנועה',[{label:'תיאור',val:x.name,req:true},{label:'סכום ₪ (מינוס = משיכה)',val:x.amt,num:true},{label:'הערות',val:x.note,type:'area'}],v=>{x.name=v[0];x.amt=v[1];x.note=v[2]});break}
   case'mdel':{const x=S.money.find(y=>y.id===id);if(!x)break;if(guard('למה למחוק כסף שבא באהבה? לך תחבק את אבא'))ask(`למחוק את "${x.name}"?`,()=>{S.money=S.money.filter(y=>y.id!==id);save();render()});break}
-  case'dreamnew':form('חולם. כובש. 🚀',[{label:'החלום',val:'',req:true,ph:'למשל: אוזניות חדשות'},{label:'מחיר יעד בנקודות',val:'',num:true,req:true},{label:'הערות',val:'',type:'area'}],v=>{S.dreams.push({id:uid(),ts:Date.now(),name:v[0],target:v[1],notes:v[2],icon:'🚀',ok:admin,calc:{dad:0,mom:0,counts:{}}});if(!admin)setTimeout(()=>alertBox('החלום נשמר! 🚀 אבא צריך לאשר את המחיר, ואז אפשר להתחיל לתכנן','📨','סבבה'),50)},'הוסף חלום');break;
-  case'dedit':{const d=S.dreams.find(x=>x.id===id);if(d)form('עריכת חלום',[{label:'החלום',val:d.name,req:true},{label:'מחיר יעד בנקודות',val:d.target,num:true,req:true},{label:'הערות',val:d.notes,type:'area'}],v=>{if(!admin&&num(v[1])!==num(d.target))d.ok=false;if(admin)d.ok=true;d.name=v[0];d.target=v[1];d.notes=v[2]});break}
-  case'ddel':{const d=S.dreams.find(x=>x.id===id);if(d)ask(`למחוק את החלום "${d.name}"?`,()=>{S.dreams=S.dreams.filter(x=>x.id!==id);save();render()});break}
-  case'calc':{const d=S.dreams.find(x=>x.id===id);if(!d)break;if(d.ok===false){alertBox('המחיר של החלום עוד מחכה לאישור של אבא ⏳','🧮');break}openCalc(d);break}
-  case'dok':{const d=S.dreams.find(x=>x.id===id);if(!d)break;d.ok=true;(S.inbox=S.inbox||[]).push(`✅ החלום "${d.name}" אושר: ${fN(d.target)} נק'`);save();render();break}
-  case'dprice':{const d=S.dreams.find(x=>x.id===id);if(d)form(`תמחור: ${d.name}`,[{label:'מחיר בנקודות',val:d.target,num:true,req:true}],v=>{const ch=num(v[0])!==num(d.target);d.target=v[0];d.ok=true;(S.inbox=S.inbox||[]).push(`✅ החלום "${d.name}" אושר${ch?' במחיר מעודכן':''}: ${fN(d.target)} נק'`)},'אשר במחיר הזה');break}
-  case'dno':{const d=S.dreams.find(x=>x.id===id);if(d)ask(`לא לאשר את "${d.name}"? החלום יימחק`,()=>{S.dreams=S.dreams.filter(x=>x.id!==id);(S.inbox=S.inbox||[]).push(`❌ החלום "${d.name}" לא אושר. אפשר לדבר עם אבא 🙂`);save();render()},'כן, לא מאשר');break}
+  case'dreamnew':form('רוצה משהו חדש? 🏆',[{label:'אייקון – לחץ על אחד',val:'🎁',pick:'🎁🎮👕⚽🏟️🍕🍦🍫🎬📱📺🎧🎟️🛍️✈️🏆💸🚲🛹'},{label:'מה אתה רוצה?',val:'',req:true,ph:'למשל: חולצת כדורגל'},{label:admin?'מחיר בנקודות':'כמה נקודות זה צריך לעלות לדעתך?',val:'',num:true,req:true},{label:'הערות',val:'',type:'area'}],v=>{
+    if(admin){S.rewards.push({id:uid(),icon:v[0]||'🎁',name:v[1],desc:v[3],pts:v[2],unit:''});return}
+    S.dreams.push({id:uid(),ts:Date.now(),name:v[1],target:v[2],notes:v[3],icon:v[0]||'🎁',ok:false});setTimeout(()=>alertBox('הבקשה נשלחה! 📨 אבא יקבע מחיר, ואז זה יופיע בחנות','🏆','סבבה'),50)},admin?'הוסף לחנות':'שלח לאבא');break;
+  case'ddel':{const d=S.dreams.find(x=>x.id===id);if(d)ask(`למחוק את הבקשה "${d.name}"?`,()=>{S.dreams=S.dreams.filter(x=>x.id!==id);save();render()});break}
+  case'calc':{const r=S.rewards.find(x=>x.id===id);if(r)openCalc(r);break}
+  case'dok':case'dprice':{const d=S.dreams.find(x=>x.id===id);if(!d)break;
+    const promote=pts=>{S.rewards.push({id:d.id,icon:d.icon||'🎁',name:d.name,desc:d.notes||'',pts:num(pts),unit:''});S.dreams=S.dreams.filter(x=>x.id!==id);(S.inbox=S.inbox||[]).push(`✅ "${d.name}" נוסף לחנות: ${fN(pts)} נק'`)};
+    if(a==='dok'){promote(d.target);save();render();alertBox(`"${d.name}" נוסף לחנות ✔️`,'👍','סגור')}
+    else form(`תמחור: ${d.name}`,[{label:'מחיר בנקודות',val:d.target,num:true,req:true}],v=>{promote(v[0])},'אשר והוסף לחנות');break}
+  case'dno':{const d=S.dreams.find(x=>x.id===id);if(d)ask(`לא לאשר את "${d.name}"? הבקשה תימחק`,()=>{S.dreams=S.dreams.filter(x=>x.id!==id);(S.inbox=S.inbox||[]).push(`❌ "${d.name}" לא נכנס לחנות. אפשר לדבר עם אבא 🙂`);save();render()},'כן, לא מאשר');break}
   case'ok':decide(id,true);break;
   case'no':decide(id,false);break;
   case'anew':case'aedit':{const L=S[adminTab],x=a==='aedit'?L.find(y=>y.id===id):null;
