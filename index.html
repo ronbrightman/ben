@@ -247,7 +247,8 @@ function closeTop(el){const ov=el?el.closest('.ov'):[...document.querySelectorAl
 function alertBox(text,emoji='😏',btn='הבנתי'){modal(`<div class="alert"><div class="ae">${emoji}</div><p>${esc(text)}</p><button class="btn pri" data-act="close">${btn}</button></div>`,{cls:'small',center:true})}
 function ask(text,yes,yesLabel='כן, למחוק'){const ov=modal(`<div class="alert"><div class="ae">🤔</div><p>${esc(text)}</p><div class="row2" style="grid-auto-rows:auto"><button class="btn ghost" data-act="close" style="min-height:0">ביטול</button><button class="btn danger" data-y style="min-height:0">${yesLabel}</button></div></div>`,{cls:'small',center:true});
   ov.querySelector('[data-y]').onclick=()=>{ov.remove();yes()}}
-function guard(msg){if(admin)return true;alertBox(msg,'😏','בסדר, בסדר...');return false}
+function guard(msg){if(admin)return true;alertBox(msg,'😏','בסדר, בסדר...');const o=[...document.querySelectorAll('.ov')].pop();const al=o&&o.querySelector('.alert');
+  if(al){const k=document.createElement('button');k.className='btn ghost';k.style.marginTop='8px';k.textContent='🔐 אבא? הכנס קוד';k.onclick=()=>{o.remove();pinGate(true)};al.appendChild(k)}return false}
 function form(title,fields,onSave,btn='שמור'){
   const ov=modal(`<h3>${esc(title)}</h3>${fields.map((f,i)=>`<div class="fld"><label>${esc(f.label)}</label>${f.type==='area'?`<textarea rows="3" data-i="${i}">${esc(f.val)}</textarea>`:f.type==='select'?`<select data-i="${i}">${f.opts.map(o=>`<option value="${esc(o.v)}" ${o.v==f.val?'selected':''}>${esc(o.t)}</option>`).join('')}</select>`:`<input data-i="${i}" value="${esc(f.val??'')}" ${f.num?'inputmode="decimal"':''} placeholder="${esc(f.ph||'')}">`}</div>`).join('')}<button class="btn pri" data-sv>${btn}</button>`);
   ov.querySelector('[data-sv]').onclick=()=>{const v=fields.map((f,i)=>{const el=ov.querySelector(`[data-i="${i}"]`).value.trim();return f.num?num(el):el});
@@ -282,7 +283,7 @@ home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
   <div class="bal"><small>⚽ היתרה שלי</small><div class="big">${fN(p)} <span>נק'</span></div>
   <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
   <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
-  <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:`פנדל יומי – הגרלה!<small style="display:block;font-size:14px;font-weight:700;margin-top:2px">⏳ נשאר עד חצות: <span class="cdn" style="font-variant-numeric:tabular-nums">${toMidnight()}</span></small>`}</button>
+  <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'פנדל יומי – הגרלה!'}</button>
   <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['dreams','🏆','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
 tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
   return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
@@ -363,9 +364,9 @@ function openCalc(d){const c=JSON.parse(JSON.stringify(d.calc||{dad:0,mom:0,coun
   upd()}
 
 /* ============ flows ============ */
-function pinGate(){const ov=modal(`<h3>רק לאבא 🔐</h3><div class="fld"><label>קוד</label><input id="pp" type="password" inputmode="numeric" autocomplete="off"></div><button class="btn or" data-sv>כניסה</button>`,{center:true});
+function pinGate(stay){const ov=modal(`<h3>רק לאבא 🔐</h3><div class="fld"><label>קוד</label><input id="pp" type="password" inputmode="numeric" autocomplete="off"></div><button class="btn or" data-sv>כניסה</button>`,{center:true});
   const i=ov.querySelector('#pp');setTimeout(()=>i.focus(),80);
-  const tryIt=()=>{if(i.value===String(S.pin)){ov.remove();admin=true;route='admin';if(S.dreams.some(d=>d.ok===false))adminTab='dreams';render()}else{ov.remove();alertBox('אופס! ניסית לפרוץ לכספת? אין מעבר!','🚨')}};
+  const tryIt=()=>{if(i.value===String(S.pin)){ov.remove();admin=true;if(stay){render();alertBox('מצב אבא פעיל 🔓 עכשיו אפשר לערוך ולמחוק','👍','סגור');return}route='admin';if(S.dreams.some(d=>d.ok===false))adminTab='dreams';render()}else{ov.remove();alertBox('אופס! ניסית לפרוץ לכספת? אין מעבר!','🚨')}};
   ov.querySelector('[data-sv]').onclick=tryIt;i.onkeydown=e=>{if(e.key==='Enter')tryIt()}}
 function drawFlow(){const today=dayKey();
   if(S.draw&&S.draw.day===today){showPrize(S.draw,false);alertBox('בן, פנדל אחד ביום! תחזור מחר לבעוט שוב','⚽','סבבה');setTimeout(()=>{const o=[...document.querySelectorAll('.ov')].pop();o&&o.querySelector('.alert p').insertAdjacentHTML('afterend',`<div class="note" style="margin:-6px 0 14px">נפתח שוב בעוד <b class="cdn" style="color:var(--cyan)">${toMidnight()}</b></div>`)},0);return}
