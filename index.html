@@ -285,7 +285,7 @@ home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
   return `<div class="logo">${LOGO}<b>הכספת של בן</b></div><div style="text-align:center;margin:-6px 0 10px;color:#fff;font-weight:900;font-size:14px;letter-spacing:.5px;text-shadow:0 1px 4px #000a">💙 סיטי עד הסוף 💙</div>
   <div class="bal"><small>⚽ היתרה שלי</small><div class="big">${fN(p)} <span>נק'</span></div>
   <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
-  <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
+  <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המרה נקודות ⇄ כסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
   <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'פנדל יומי – הגרלה!'}</button>
   <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['dreams','🏆','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
 tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
@@ -303,7 +303,7 @@ history(){const all=S.ledger.concat(S.money.map(x=>Object.assign({},x,{isM:1})))
 bank(){const mb=monthBtn('bank',S.money,'₪');
   return `<h1 class="page">הקופה אצל אבא 🏦</h1>
   <div class="bal" style="margin-bottom:12px"><small>הכסף שלי אצל אבא</small><div class="big">₪${fN(CASH())}</div><div class="sub"><span class="pill">שער: ${fN(S.ratio)} נק' = ₪1</span><span class="pill">⚡ ${fN(PTS())} נק' = ₪${fN(toCash(PTS()))}</span></div></div>
-  <div class="row2"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button>${mb.html}</div>
+  <div class="row2"><button class="btn cy" data-act="convert">⚡ המרה נקודות ⇄ כסף</button>${mb.html}</div>
   <button class="btn" style="margin-top:10px" data-act="moneyadd">± הפקדה / משיכה</button>
   ${pendingList(['convert'])}<h2>${mb.m.label}</h2>
   ${mb.m.items.length?`<div class="list">${mb.m.items.map(x=>`<div class="li"><div class="ic">${x.icon||'💵'}</div><div class="t"><b>${esc(x.name)}</b><small>${fD(x.ts)}${x.by?' · נרשם ע"י '+x.by:''}${x.note?' · '+esc(x.note):''}</small></div><span class="v ${x.amt>=0?'plus':'minus'}">₪${fN(x.amt)}</span><div class="acts"><button data-act="medit" data-id="${x.id}">✏️</button><button data-act="mdel" data-id="${x.id}">🗑️</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">אין תנועות בחודש הזה</div></div>`}`},
@@ -326,7 +326,7 @@ admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
     <h2>⭐ נקודות: ${fN(PTS())} נק'</h2><div class="row2"><button class="btn pri" data-act="adjpts" data-sign="1">+ הוסף נקודות</button><button class="btn or" data-act="adjpts" data-sign="-1">− הורד נקודות</button></div>
     <h2>🏦 כסף אצל אבא: ₪${fN(CASH())}</h2><div class="row2"><button class="btn pri" data-act="adjcash" data-sign="1">+ הוסף כסף</button><button class="btn or" data-act="adjcash" data-sign="-1">− הורד כסף</button></div></div>`}
   if(adminTab==='settings'){body=`<div class="list" style="padding:14px">
-    <div class="fld"><label>📱 תאריך יום ההולדת ה-14 של בן (לחישוב הטיקטוק)</label><input id="tt14" type="date" value="${esc(S.tiktok14||'')}"></div><div class="note" style="margin-top:-6px">המרה: 1 נק' = ₪1, רק מנקודות לכסף.</div>
+    <div class="fld"><label>📱 תאריך יום ההולדת ה-14 של בן (לחישוב הטיקטוק)</label><input id="tt14" type="date" value="${esc(S.tiktok14||'')}"></div><div class="note" style="margin-top:-6px">המרה: 1 נק' = ₪1, בשני הכיוונים (נקודות ⇄ כסף).</div>
     <div class="fld"><label>קוד אבא (PIN)</label><input id="pin" inputmode="numeric" value="${esc(S.pin)}"></div>
     <button class="btn pri" data-act="setsave">שמור הגדרות</button></div>
     <h2>💾 גיבוי</h2><div class="note">הנתונים נשמרים בדפדפן של המכשיר הזה. כדי להעביר למכשיר אחר או לשמור עותק: העתק את קוד הגיבוי, ובמכשיר השני הדבק ולחץ "שחזר".</div>
@@ -394,10 +394,16 @@ function buy(id){const r=S.rewards.find(x=>x.id===id),p=PTS();if(!r)return;
     addLedger('reward',`${r.name} · ${fN(q)} ${r.unit==='דקה'?'דקות':r.unit==='יום'?'ימים':r.unit}`,-c,r.icon,'',{qty:q,rid:r.id,tag:r.tag||''});save();render();alertBox(`תתחדש! ${fN(c)} נק' ירדו מהכספת. זה שלך! 🎉`,'🛒','מגניב')});return}
   if(p<r.pts){alertBox(`חסרות לך ${fN(r.pts-p)} נק'. יאללה, למשימות! 💪`,'🪙');return}
   ask(`לקנות "${r.name}" ב-${fN(r.pts)} נק'?`,()=>{addLedger('reward',r.name,-r.pts,r.icon,'',{rid:r.id});save();render();alertBox(`תתחדש! ${fN(r.pts)} נק' ירדו מהכספת. זה שלך! 🎉`,'🛒','מגניב')},'כן, אני רוצה!')}
-function convertFlow(){const ov=modal(`<h3>המר נקודות לכסף ⚡</h3><div class="note">השער: ${fN(S.ratio)} נק' = ₪1 · יש לך ${fN(PTS())} נק'</div>
-  <div class="fld"><label>כמה נקודות להמיר?</label><input id="cv" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>תקבל לקופה</small><div class="big" id="cvo" style="font-size:34px">₪0</div></div><button class="btn cy" data-sv>המר עכשיו</button>`);
-  const i=ov.querySelector('#cv');i.addEventListener('input',()=>ov.querySelector('#cvo').textContent='₪'+fN(toCash(num(i.value))));setTimeout(()=>i.focus(),80);
-  ov.querySelector('[data-sv]').onclick=()=>{const p=Math.floor(num(i.value));if(p<=0)return;if(p>PTS()){alertBox('אין לך כל כך הרבה נקודות 😅','🪙');return}
+function convertFlow(dir){const c2p=dir==='c2p',have=c2p?CASH():PTS();
+  const ov=modal(`<h3>המרה ⚡</h3><div class="row2" style="grid-auto-rows:auto;margin-bottom:12px"><button class="btn ${c2p?'':'cy'}" style="min-height:0" data-dir="p2c">נקודות ← כסף</button><button class="btn ${c2p?'cy':''}" style="min-height:0" data-dir="c2p">כסף ← נקודות</button></div>
+  <div class="note">השער: ${fN(S.ratio)} נק' = ₪1 · יש לך ${c2p?'₪'+fN(have):fN(have)+' נק\''}</div>
+  <div class="fld"><label>${c2p?'כמה ₪ להמיר לנקודות?':'כמה נקודות להמיר?'}</label><input id="cv" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>${c2p?'תקבל לכספת':'תקבל לקופה'}</small><div class="big" id="cvo" style="font-size:34px">${c2p?"0 נק'":'₪0'}</div></div><button class="btn cy" data-sv>המר עכשיו</button>`);
+  ov.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{ov.remove();convertFlow(b.dataset.dir)});
+  const i=ov.querySelector('#cv');i.addEventListener('input',()=>ov.querySelector('#cvo').textContent=c2p?fN(Math.floor(num(i.value))*num(S.ratio||1))+" נק'":'₪'+fN(toCash(num(i.value))));setTimeout(()=>i.focus(),80);
+  ov.querySelector('[data-sv]').onclick=()=>{const x=Math.floor(num(i.value));if(x<=0)return;
+    if(c2p){if(x>CASH()){alertBox('אין לך כל כך הרבה כסף בקופה 😅','🏦');return}const p=x*num(S.ratio||1);
+      S.money.push({id:uid(),ts:Date.now(),name:`המרה ל-${fN(p)} נק'`,amt:-x,icon:'🔄',by:admin?'אבא':'בן'});addLedger('convert','המרה מכסף',p,'🔄');save();ov.remove();render();alertBox(`${fN(p)} נק' נכנסו לכספת! ⚽`,'🔄','מעולה');return}
+    const p=x;if(p>PTS()){alertBox('אין לך כל כך הרבה נקודות 😅','🪙');return}
     addLedger('convert','המרה לכסף',-p,'⚡');S.money.push({id:uid(),ts:Date.now(),name:`המרת ${fN(p)} נק'`,amt:toCash(p),icon:'⚡'});save();ov.remove();render();alertBox(`₪${fN(toCash(p))} נכנסו לקופה אצל אבא 💰`,'⚡','מעולה')}}
 function decide(id,ok){const r=S.requests.find(x=>x.id===id);if(!r||r.status!=='pending')return;
   if(ok){if((r.kind==='reward'||r.kind==='convert')&&PTS()<r.pts){alertBox('אין לו מספיק נקודות כרגע לבקשה הזו','⚠️');return}
