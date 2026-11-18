@@ -2,7 +2,7 @@
 // הקוד המשפחתי לא נשמר כאן, רק טביעת SHA-256 שלו
 import { getStore } from "@netlify/blobs";
 
-const CODE_HASH = "9d1540d74d63d46c5172260d83627aee5be3a23d8ab493a46f06226ca1c25f2d";
+const CODE_HASH = "da567b5f09f055a646df0e74c6014785930a8d207b22964868153f872b9bf9cf";
 
 async function sha256(s) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
