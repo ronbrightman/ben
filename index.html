@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>הכספת של בן</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d17;--card:#151829;--card2:#1c2036;--line:#272b45;--lime:#c8ff3c;--cyan:#38e1ff;--orange:#ff6b2c;--red:#ff4d6d;--txt:#f2f4ff;--mut:#8b91b3}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--txt);font-family:Rubik,system-ui,sans-serif;font-size:15px}
+body{min-height:100dvh;background:radial-gradient(120% 60% at 100% 0,#1b2350 0,transparent 60%),radial-gradient(90% 50% at 0 100%,#1d3a1a55 0,transparent 60%),var(--bg)}
+button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea,select{font-family:inherit;font-size:16px;color:var(--txt);background:#0f1222;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--cyan)}
+.wrap{max-width:520px;margin:0 auto;padding:0 14px 24px}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:#0b0d17e8;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{max-width:520px;margin:0 auto;display:flex;justify-content:space-between;padding:6px 8px}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;font-size:11px;color:var(--mut)}
+.nav button span{font-size:20px;filter:grayscale(.3)}
+.nav button.on{color:var(--lime);background:#c8ff3c14}
+.nav button.on span{filter:none}
+.adminchip{max-width:520px;margin:0 auto;display:flex;justify-content:center;padding:0 0 6px}
+.adminchip button{font-size:12px;background:var(--orange);color:#111;font-weight:700;border-radius:99px;padding:3px 12px}
+h1.page{font-family:'Secular One',Rubik;font-size:22px;line-height:1.25;margin:16px 2px 12px}
+h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
+/* home */
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 10px}
+.logo b{font-family:'Secular One';font-size:30px;letter-spacing:.5px;background:linear-gradient(90deg,var(--lime),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.bal{background:linear-gradient(135deg,#1a1f3b,#121528);border:1.5px solid var(--line);border-radius:22px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.bal:after{content:"";position:absolute;inset:auto -40px -60px auto;width:160px;height:160px;border-radius:50%;background:#c8ff3c18}
+.bal small{color:var(--mut)}
+.big{font-family:'Secular One';font-size:46px;line-height:1.1;color:var(--lime)}
+.big span{font-size:20px;color:var(--txt)}
+.bal .sub{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+.pill{background:#0b0d17aa;border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:13px}
+.drawbtn{width:100%;margin:10px 0;padding:15px;border-radius:18px;font-size:20px;font-weight:900;color:#111;background:linear-gradient(90deg,var(--lime),var(--cyan));box-shadow:0 6px 24px #38e1ff40;animation:pulse 2.2s infinite}
+.drawbtn.used{animation:none;opacity:.85}
+@keyframes pulse{50%{transform:scale(1.025)}}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:13px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:700;font-size:14px}
+.tile span{font-size:28px}
+.tile.lock{border-style:dashed;color:var(--orange)}
+.tile:active,.btn:active{transform:scale(.97)}
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:13px 14px;border-radius:14px;font-weight:700;font-size:15px;background:var(--card2);border:1.5px solid var(--line);width:100%}
+.btn.pri{background:var(--lime);color:#111;border-color:var(--lime)}
+.btn.cy{background:var(--cyan);color:#111;border-color:var(--cyan)}
+.btn.or{background:var(--orange);color:#111;border-color:var(--orange)}
+.btn.danger{background:var(--red);color:#fff;border-color:var(--red)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:8px 10px;font-size:13px;width:auto;border-radius:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2>*{min-height:64px}
+.month{display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1.5px solid var(--line);border-radius:14px;padding:0 4px}
+.month .arr{font-size:24px;padding:4px 8px;color:var(--cyan)}
+.month .ml{text-align:center;line-height:1.25}
+.month .ml b{display:block;font-size:15px}
+.month .ml small{color:var(--mut);font-size:12px}
+/* lists */
+.list{background:var(--card);border:1.5px solid var(--line);border-radius:18px;overflow:hidden}
+.li{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.li .ic{width:38px;height:38px;border-radius:12px;background:var(--card2);display:grid;place-items:center;font-size:20px;flex:none}
+.li .t{flex:1;min-width:0}
+.li .t b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .t small{color:var(--mut);font-size:12px}
+.li .v{font-weight:700;white-space:nowrap}
+.plus{color:var(--lime)}.minus{color:var(--red)}
+.acts{display:flex;gap:2px}
+.acts button{font-size:16px;padding:6px;border-radius:8px;opacity:.85}
+.empty{padding:22px;text-align:center;color:var(--mut);font-size:14px}
+.badge{font-size:11px;border-radius:99px;padding:2px 8px;font-weight:700}
+.b-wait{background:#ffb02e22;color:#ffb02e}.b-ok{background:#c8ff3c22;color:var(--lime)}.b-no{background:#ff4d6d22;color:var(--red)}
+.prog{height:6px;background:#0b0d17;border-radius:9px;margin-top:5px;overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--lime),var(--cyan));border-radius:9px}
+/* cards grid */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.card .ce{font-size:24px}
+.card b{font-size:15px;line-height:1.3}
+.card small{color:var(--mut);font-size:12px;flex:1}
+.card .cf{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:4px}
+.card .p{font-weight:900;color:var(--lime);white-space:nowrap}
+.card.no{opacity:.55}
+/* modal */
+.ov{position:fixed;inset:0;z-index:50;background:#05060ccc;backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;animation:fade .18s}
+.ov.center{align-items:center}
+@keyframes fade{from{opacity:0}}
+.md{position:relative;width:100%;max-width:480px;background:#12152a;border:1.5px solid var(--line);border-radius:22px;padding:18px 16px 16px;margin:auto 0;animation:pop .22s}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+.md .x{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;background:var(--card2);font-size:14px;color:var(--mut)}
+.md h3{font-family:'Secular One';font-size:22px;margin:4px 30px 14px 0;line-height:1.25}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:13px;color:var(--mut);margin-bottom:5px}
+.alert{text-align:center;padding:8px 4px 2px}
+.alert .ae{font-size:56px;margin-bottom:6px}
+.alert p{font-size:19px;font-weight:700;line-height:1.4;margin-bottom:16px}
+.md.small{max-width:360px;border-color:var(--orange);box-shadow:0 0 0 4px #ff6b2c22}
+/* draw */
+.prize{text-align:center;padding:10px 0}
+.prize .pe{font-size:64px;animation:spin .8s ease-out}
+@keyframes spin{from{transform:rotate(-200deg) scale(.2)}}
+.prize .pt{font-family:'Secular One';font-size:24px;margin:8px 0;line-height:1.3}
+.prize .pp{color:var(--lime);font-weight:900;font-size:18px}
+/* calc */
+.sum{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:4px 12px;margin-bottom:12px}
+.sum .r{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.sum .r:last-child{border-bottom:0}
+.sum .r span{color:var(--mut)}
+.sum .r input{width:110px;padding:7px 10px;text-align:center}
+.sum .r.tot b{color:var(--lime);font-size:18px}
+.sum .r.miss b{color:var(--orange);font-size:18px}
+.cnt{display:flex;align-items:center;gap:6px}
+.cnt button{width:32px;height:32px;border-radius:10px;background:var(--card2);border:1px solid var(--line);font-size:18px;font-weight:700}
+.cnt output{min-width:22px;text-align:center;font-weight:700}
+/* admin */
+.tabs{display:flex;gap:6px;margin:14px 0 12px}
+.tabs button{flex:1;padding:9px 2px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);font-size:12.5px;font-weight:700;white-space:nowrap}
+.tabs button.on{background:var(--orange);border-color:var(--orange);color:#111}
+.note{font-size:12.5px;color:var(--mut);line-height:1.5;margin:8px 2px}
+canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:80}
+</style>
+</head>
+<body>
+<header class="top"><nav class="nav" id="nav"></nav><div class="adminchip" id="chip"></div></header>
+<main class="wrap" id="view"></main>
+
+<script>
+/* ============ state ============ */
+const HM=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36);
+function defaults(){
+  const T=(icon,name,desc,pts,unit,weekMin,tag)=>({id:uid(),icon,name,desc,pts,unit:unit||'',weekMin:weekMin||0,tag:tag||''});
+  return {pin:'1234',ratio:1,tiktok14:'2028-03-24',
+    tasks:[T('📚','קריאה','נקודה על כל דקה של קריאה',1,'דקה'),
+      T('🐕','הוצאתי את אולי','מההוצאה הרביעית בשבוע: 10 נק\' לכל הוצאה',10,'',3),
+      T('💯','ציון 100 במבחן','',10),T('🎓','ציון מעל 90 במבחן','',5),
+      T('💬','מילה טובה','',5),
+      T('😴','במיטה עד 21:30','',15),T('🌙','במיטה עד 21:45','',10),
+      T('♟️','משחק שח','',15),
+      T('🍽️','ארוחה בלי מסך','',5),
+      T('🏫','סיפרתי מה למדתי בכל שיעור','אחרי יום בבית ספר',5),
+      T('🥢','טעמתי מאכל חדש','',10)],
+    rewards:[T('🌅','הסעה לבית ספר בשעת אפס','',20),T('🚗','הסעה לבית ספר בשעה רגילה','',10),
+      T('🎮','GTA 7','',500),
+      T('📱','טיקטוק מוקדם יותר','נקודה על כל יום הקדמה מגיל 14',1,'יום','', 'tiktok'),
+      T('📸','דקות אינסטגרם מעל השעה','נקודה לכל דקה נוספת',1,'דקה'),
+      T('▶️','דקות יוטיוב מעל השעה','נקודה לכל דקה נוספת',1,'דקה')],
+    surprises:[1,2,3,4,5].map(n=>({id:uid(),text:`+${n} ${n===1?'נקודה':'נקודות'}`,pts:n})),
+    ledger:[],money:[],requests:[],dreams:[],draw:null};
+}
+/* ===== שמירה בשרת (Netlify Function + Netlify Blobs) + עותק מקומי ===== */
+const API='/api/vault';
+const CACHE='ben-vault-cache-v3',CODEKEY='ben-vault-code';
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function migrate(s){s=s&&s.tasks?s:defaults();s.ratio=1;s.fixedDraws=s.fixedDraws||{};
+  if(!s.fixedSeed1){s.fixedDraws['2026-11-18']=7;s.fixedSeed1=true}if(!s.tiktok14)s.tiktok14='2028-03-24';
+  if(!s.openSet){s.money.push({id:uid(),ts:Date.now(),name:'יתרת פתיחה – הכסף של בן אצל אבא',amt:2260,icon:'💰'});s.openSet=true}
+  ['ledger','money','requests','dreams','surprises','tasks','rewards'].forEach(k=>s[k]=s[k]||[]);return s}
+let base=null,S=null,ver='',code=null,net=true,dirty=false,pushing=false,noApi=!/^https?:/.test(location.protocol);
+const cloud=()=>!noApi;
+function cacheIt(){lsSet(CACHE,JSON.stringify({S,ver,dirty,base}))}
+const clone=o=>o==null?o:JSON.parse(JSON.stringify(o));
+// מיזוג תלת-כיווני: מחילים על הנתונים מהשרת רק את מה שהמכשיר הזה שינה מאז הסנכרון האחרון
+function merge(remote,local,b){const out=clone(remote)||{};b=b||{};
+  new Set([...Object.keys(local),...Object.keys(b)]).forEach(k=>{const L=local[k],B=b[k];
+    if(Array.isArray(L)&&L.every(x=>x&&x.id)){const bm=new Map((B||[]).map(x=>[x.id,x])),lm=new Map(L.map(x=>[x.id,x]));
+      let res=(out[k]||[]).filter(x=>!(bm.has(x.id)&&!lm.has(x.id)));
+      res=res.map(x=>{const l=lm.get(x.id),o=bm.get(x.id);return l&&o&&JSON.stringify(l)!==JSON.stringify(o)?l:x});
+      L.forEach(x=>{if(!bm.has(x.id)&&!res.some(y=>y.id===x.id))res.push(x)});out[k]=res}
+    else if(JSON.stringify(L)!==JSON.stringify(B))out[k]=clone(L)});
+  return out}
+function setNet(ok){if(net!==ok){net=ok;const b=document.getElementById('netbar');if(b)b.style.display=ok?'none':'block'}}
+function save(){dirty=true;cacheIt();clearTimeout(save.t);save.t=setTimeout(push,200)}
+async function push(){if(!cloud()||!code||!dirty||pushing)return;pushing=true;dirty=false;const snap=JSON.parse(JSON.stringify(S));
+  try{const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,data:snap,version:ver})});
+    if(r.status===409){const g=await fetch(`${API}?code=${encodeURIComponent(code)}`,{cache:'no-store'});if(!g.ok)throw new Error('http '+g.status);
+      const row=await g.json();S=merge(row.data||{},S,base);ver=row.version;base=clone(row.data);dirty=true;cacheIt();if(!document.querySelector('.ov'))render()}
+    else if(r.status===403){badCode()}
+    else if(r.status===404){noApi=true}
+    else if(!r.ok)throw new Error('http '+r.status);
+    else{ver=(await r.json()).version;base=snap;cacheIt()}setNet(true)}
+  catch(e){dirty=true;cacheIt();setNet(false);setTimeout(push,8000)}
+  pushing=false;if(dirty)push()}
+async function pull(force){if(!cloud()||!code)return;if((dirty||pushing)&&!force)return;if(!force&&document.querySelector('.ov'))return;
+  try{const res=await fetch(`${API}?code=${encodeURIComponent(code)}`,{cache:'no-store'});
+    if(res.status===403){badCode();return}if(res.status===404){noApi=true;return}if(!res.ok)throw new Error('http '+res.status);
+    const row=await res.json();
+    if(force||row.version!==ver){const empty=!row.data||!row.data.tasks;ver=row.version;base=clone(row.data);S=migrate(clone(row.data));dirty=false;cacheIt();
+      if(force)document.querySelectorAll('.ov').forEach(o=>o.remove());render();if(empty)save()}
+    setNet(true)}catch(e){setNet(false)}}
+function badCode(){lsSet(CODEKEY,'');code=null;askCode('הקוד לא נמצא. בקש מאבא את הלינק הנכון')}
+function askCode(msg){$('#nav').innerHTML='';$('#chip').innerHTML='';$('#view').innerHTML=`<div class="logo" style="margin-top:40px">${LOGO}<b>הכספת של בן</b></div><div class="list" style="padding:16px"><div class="note" style="margin-top:0">${esc(msg||'כדי להתחבר לכספת, פתח את הלינק ששלח לך אבא, או הקלד את קוד המשפחה:')}</div><div class="fld"><input id="fcode" autocomplete="off" placeholder="קוד משפחה"></div><button class="btn pri" id="fgo">התחבר</button></div>`;
+  $('#fgo').onclick=()=>{const c=$('#fcode').value.trim();if(!c)return;lsSet(CODEKEY,c);location.reload()}}
+async function boot(){
+  const h=location.hash.slice(1);if(h.startsWith('c=')){code=decodeURIComponent(h.slice(2));lsSet(CODEKEY,code);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}else code=lsGet(CODEKEY)||null;
+  let c=null;try{c=JSON.parse(lsGet(CACHE)||'null')}catch(e){}
+  S=migrate(c&&c.S);ver=c&&c.ver||'';base=c&&c.base||null;dirty=!!(c&&c.dirty);
+  if(!cloud()){render();notices();return}
+  if(!code){askCode();return}
+  render();if(dirty)await push();else await pull(true);notices();
+  setInterval(()=>{if(!document.hidden)pull()},15000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){dirty?push():pull()}});
+  addEventListener('online',()=>{dirty?push():pull()})}
+let admin=false,route='home',adminTab='tasks',moff={history:0,bank:0};
+
+/* ============ helpers ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=parseFloat(String(v).replace(/,/g,'').replace(/[^\d.\-]/g,''));return isNaN(n)?0:n};
+const fN=n=>Number(n).toLocaleString('he-IL',{maximumFractionDigits:2});
+const p2=n=>String(n).padStart(2,'0');
+const fD=ts=>{const d=new Date(ts);return `${p2(d.getDate())}/${p2(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)} · ${p2(d.getHours())}:${p2(d.getMinutes())}`};
+const PTS=()=>S.ledger.reduce((a,x)=>a+num(x.pts),0);
+const CASH=()=>S.money.reduce((a,x)=>a+num(x.amt),0);
+const toCash=p=>Math.floor(num(p)*100)/100; // 1 נק' = ₪1
+const perTxt=x=>x.unit?` ל${x.unit}`:'';
+function weekStart(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.getTime()}
+const weekCount=tid=>S.ledger.filter(r=>r.tid===tid&&r.ts>=weekStart()).length;
+const tiktokDays=()=>S.ledger.filter(r=>r.tag==='tiktok').reduce((a,r)=>a+num(r.qty),0);
+function ttTarget(){const t=new Date((S.tiktok14||'2028-03-24')+'T00:00:00');t.setDate(t.getDate()-tiktokDays());return t}
+function ttLeft(){const ms=Math.max(0,ttTarget()-Date.now()),s=Math.floor(ms/1000);return {d:Math.floor(s/86400),t:`${p2(Math.floor(s%86400/3600))}:${p2(Math.floor(s%3600/60))}:${p2(s%60)}`,done:ms<=0}}
+function tiktokInfo(){const d=tiktokDays(),l=ttLeft();return `${l.done?'הגיע הזמן! 🎉':`עוד ${fN(l.d)} ימים`} · טיקטוק מ-${fD(ttTarget().getTime()).split(' ·')[0]}${d?` · קנית ${fN(d)} ימי הקדמה`:''}`}
+function toMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const s=Math.max(0,Math.floor((m-n)/1000));return `${p2(Math.floor(s/3600))}:${p2(Math.floor(s%3600/60))}:${p2(s%60)}`}
+let lastDay=null;
+setInterval(()=>{document.querySelectorAll('.cdn').forEach(e=>e.textContent=toMidnight());const k=dayKey();if(lastDay&&k!==lastDay&&route==='home'&&!document.querySelector('.ov'))render();lastDay=k},1000);
+setInterval(()=>{const e=document.getElementById('tt');if(!e)return;const l=ttLeft();e.innerHTML=l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`},1000);
+function qtyAsk(x,verb,cb){const ov=modal(`<h3>${x.icon} ${esc(x.name)}</h3><div class="note">${fN(x.pts)} נק'${perTxt(x)}</div><div class="fld"><label>כמה? (${esc(x.unit)})</label><input id="q" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>${verb}</small><div class="big" id="qo" style="font-size:34px">0 <span>נק'</span></div></div><button class="btn pri" data-sv>${verb==='נכנס לכספת'?'יאללה, תוסיף!':'קנה!'}</button>`);
+  const i=ov.querySelector('#q');i.addEventListener('input',()=>ov.querySelector('#qo').innerHTML=fN(Math.floor(num(i.value))*x.pts)+' <span>נק\'</span>');setTimeout(()=>i.focus(),80);
+  ov.querySelector('[data-sv]').onclick=()=>{const q=Math.floor(num(i.value));if(q<=0)return;ov.remove();cb(q)}}
+function dayKey(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`} // מתחדש בחצות לפי שעון המכשיר
+function monthOf(list,off){const n=new Date(),m=new Date(n.getFullYear(),n.getMonth()+off,1);
+  return {label:`${HM[m.getMonth()]} ${m.getFullYear()}`,items:list.filter(x=>{const d=new Date(x.ts);return d.getFullYear()===m.getFullYear()&&d.getMonth()===m.getMonth()}).sort((a,b)=>b.ts-a.ts)}}
+function addLedger(type,name,pts,icon,note,extra){S.ledger.push(Object.assign({id:uid(),ts:Date.now(),type,name,pts:num(pts),icon:icon||'⭐',note:note||''},extra||{}))}
+function addReq(kind,name,pts,icon,extra){S.requests.push(Object.assign({id:uid(),ts:Date.now(),kind,name,pts:num(pts),icon:icon||'⭐',status:'pending',seen:false},extra||{}));save()}
+
+/* ============ modals ============ */
+function modal(html,o={}){const ov=document.createElement('div');ov.className='ov'+(o.center?' center':'');
+  ov.innerHTML=`<div class="md ${o.cls||''}"><button class="x" data-act="close" aria-label="סגור">✕</button>${html}</div>`;
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});document.body.appendChild(ov);return ov}
+function closeTop(el){const ov=el?el.closest('.ov'):[...document.querySelectorAll('.ov')].pop();ov&&ov.remove()}
+function alertBox(text,emoji='😏',btn='הבנתי'){modal(`<div class="alert"><div class="ae">${emoji}</div><p>${esc(text)}</p><button class="btn pri" data-act="close">${btn}</button></div>`,{cls:'small',center:true})}
+function ask(text,yes,yesLabel='כן, למחוק'){const ov=modal(`<div class="alert"><div class="ae">🤔</div><p>${esc(text)}</p><div class="row2" style="grid-auto-rows:auto"><button class="btn ghost" data-act="close" style="min-height:0">ביטול</button><button class="btn danger" data-y style="min-height:0">${yesLabel}</button></div></div>`,{cls:'small',center:true});
+  ov.querySelector('[data-y]').onclick=()=>{ov.remove();yes()}}
+function guard(msg){if(admin)return true;alertBox(msg,'😏','בסדר, בסדר...');return false}
+function form(title,fields,onSave,btn='שמור'){
+  const ov=modal(`<h3>${esc(title)}</h3>${fields.map((f,i)=>`<div class="fld"><label>${esc(f.label)}</label>${f.type==='area'?`<textarea rows="3" data-i="${i}">${esc(f.val)}</textarea>`:f.type==='select'?`<select data-i="${i}">${f.opts.map(o=>`<option value="${esc(o.v)}" ${o.v==f.val?'selected':''}>${esc(o.t)}</option>`).join('')}</select>`:`<input data-i="${i}" value="${esc(f.val??'')}" ${f.num?'inputmode="decimal"':''} placeholder="${esc(f.ph||'')}">`}</div>`).join('')}<button class="btn pri" data-sv>${btn}</button>`);
+  ov.querySelector('[data-sv]').onclick=()=>{const v=fields.map((f,i)=>{const el=ov.querySelector(`[data-i="${i}"]`).value.trim();return f.num?num(el):el});
+    if(fields.some((f,i)=>f.req&&(f.num?!(v[i]>0):!v[i]))){alertBox('רגע, חסר משהו בשדות 🙃','✍️');return}
+    if(onSave(v)!==false){ov.remove();save();render()}};
+  setTimeout(()=>{const f=ov.querySelector('input,textarea');f&&f.focus()},80)}
+
+/* ============ fx ============ */
+function boom(){
+  try{const A=new (window.AudioContext||window.webkitAudioContext)();[523,659,784,1047,1319].forEach((f,i)=>{const o=A.createOscillator(),g=A.createGain();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(A.destination);const t=A.currentTime+i*.09;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.35);o.start(t);o.stop(t+.4)})}catch(e){}
+  const c=document.createElement('canvas');c.id='cf';document.body.appendChild(c);const x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const C=['#c8ff3c','#38e1ff','#ff6b2c','#ffffff','#ffd23c','#a06bff'];const P=Array.from({length:170},()=>({x:c.width/2,y:c.height*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*15-4,r:Math.random()*6+4,a:Math.random()*6,va:(Math.random()-.5)*.4,c:C[Math.random()*C.length|0]}));
+  const t0=performance.now();(function f(t){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});t-t0<3000?requestAnimationFrame(f):c.remove()})(t0)}
+
+/* ============ nav ============ */
+const NAV=[['home','🏠','בית'],['tasks','🎯','משימות'],['shop','🛒','חנות'],['dreams','🚀','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
+function go(r){if(r==='admin'&&!admin){pinGate();return}route=r;render();scrollTo(0,0)}
+function renderNav(){$('#nav').innerHTML=NAV.map(([k,i,t])=>`<button class="${route===k?'on':''}" data-go="${k}"><span>${i}</span>${t}</button>`).join('');
+  $('#chip').innerHTML=admin?`<button data-act="lock">🔓 מצב אבא פעיל · לחץ לנעילה</button>`:''}
+
+/* ============ views ============ */
+const LOGO=`<svg width="46" height="46" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8ff3c"/><stop offset="1" stop-color="#38e1ff"/></linearGradient></defs><rect x="3" y="3" width="42" height="42" rx="13" fill="url(#g)"/><circle cx="24" cy="24" r="12" fill="#0b0d17"/><circle cx="24" cy="24" r="8" fill="none" stroke="#c8ff3c" stroke-width="2.5" stroke-dasharray="3 3"/><path d="M26 15l-7 10h5l-2 8 7-10h-5z" fill="#c8ff3c"/></svg>`;
+function monthBtn(k,list,unit){const m=monthOf(list,moff[k]);const sum=m.items.reduce((a,x)=>a+num(unit==='₪'?x.amt:(x.isM?0:x.pts)),0);
+  return {m,html:`<div class="month"><button class="arr" data-act="mprev" data-k="${k}" aria-label="חודש קודם">›</button><div class="ml"><b>${m.label}</b><small>${m.items.length} תנועות · ${unit==='₪'?'₪'+fN(sum):(sum>0?'+':'')+fN(sum)+' נק\''}</small></div><button class="arr" data-act="mnext" data-k="${k}" aria-label="חודש הבא" ${moff[k]>=0?'style="opacity:.25"':''}>‹</button></div>`}}
+function pendingList(kinds){const r=S.requests.filter(x=>kinds.includes(x.kind)&&x.status==='pending').sort((a,b)=>b.ts-a.ts);
+  return r.length?`<h2>⏳ ממתין לאישור של אבא</h2><div class="list">${r.map(x=>`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${fD(x.ts)}</small></div><span class="badge b-wait">ממתין</span></div>`).join('')}</div>`:''}
+function ledgerRows(items,ctx){return items.length?`<div class="list">${items.map(x=>x.isM?`<div class="li"><div class="ic">${x.icon||'💵'}</div><div class="t"><b>${esc(x.name)}</b><small>🏦 קופה · ${fD(x.ts)}${x.by?' · נרשם ע"י '+x.by:''}${x.note?' · '+esc(x.note):''}</small></div><span class="v ${x.amt>=0?'plus':'minus'}">₪${fN(x.amt)}</span><div class="acts"><button data-act="medit" data-id="${x.id}">✏️</button><button data-act="mdel" data-id="${x.id}">🗑️</button></div></div>`:`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${fD(x.ts)}${x.note?' · '+esc(x.note):''}</small></div><span class="v ${x.pts>=0?'plus':'minus'}">${x.pts>0?'+':''}${fN(x.pts)} נק'</span><div class="acts"><button data-act="ledit" data-id="${x.id}" data-c="${ctx}">✏️</button><button data-act="ldel" data-id="${x.id}" data-c="${ctx}">🗑️</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">עוד אין כאן כלום. הזמן לעשות היסטוריה 😎</div></div>`}
+
+const V={
+home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
+  return `<div class="logo">${LOGO}<b>הכספת של בן</b></div>
+  <div class="bal"><small>היתרה שלי</small><div class="big">${fN(p)} <span>נק'</span></div>
+  <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
+  <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
+  <button class="drawbtn ${d?'used':''}" data-act="draw">🎰 ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'הגרלה יומית!'}</button>
+  <div class="grid3">${[['tasks','🎯','משימות'],['shop','🛒','חנות'],['dreams','🚀','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
+tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
+  return `<h1 class="page">משימות 🎯</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">🎯 משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
+shop(){const p=PTS();
+  return `<h1 class="page">החנות של בן 🛒</h1><div class="note" style="margin-top:-6px">יש לך <b style="color:var(--lime)">${fN(p)} נק'</b> לבזבז. בוחרים, אבא מאשר, הנקודות יורדות.</div>
+  ${S.rewards.length?`<div class="cards">${S.rewards.map(r=>`<div class="card ${p<r.pts?'no':''}"><div class="ce">${r.icon}</div><b>${esc(r.name)}</b><small>${esc(r.desc||'')}${r.tag==='tiktok'?`<br><span style="color:var(--cyan)">${esc(tiktokInfo())}</span>`:''}</small><div class="cf"><span class="p">${fN(r.pts)} נק'${perTxt(r)}</span><button class="btn sm cy" data-act="buy" data-id="${r.id}">אני רוצה!</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">החנות ריקה כרגע. אבא, תמלא מדפים 😉</div></div>`}
+  ${pendingList(['reward'])}`},
+dreams(){return `<h1 class="page">הדרך היחידה להגשים חלום היא להתעורר ולעבוד עליו!</h1>
+  <button class="btn cy" style="min-height:56px;font-size:17px" data-act="dreamnew">🚀 אני רוצה להתעורר!</button>
+  <h2>החלומות שלי</h2>${S.dreams.length?`<div class="list">${S.dreams.slice().sort((a,b)=>b.ts-a.ts).map(d=>{const h=dreamHave(d),pc=Math.min(100,d.target?h/d.target*100:0);
+    return `<div class="li"><div class="ic">${d.icon||'🚀'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)} · ${d.ok===false?'<span class="badge b-wait">ממתין לאישור מחיר</span>':Math.round(pc)+'%'}</small><div class="prog"><i style="width:${pc}%"></i></div></div><span class="v">${fN(d.target)} נק'</span><div class="acts"><button data-act="calc" data-id="${d.id}">🧮</button><button data-act="dedit" data-id="${d.id}">✏️</button><button data-act="ddel" data-id="${d.id}">🗑️</button></div></div>`}).join('')}</div>`:`<div class="list"><div class="empty">אין עדיין חלומות. על מה אתה חולם? 💭</div></div>`}`},
+history(){const all=S.ledger.concat(S.money.map(x=>Object.assign({},x,{isM:1})));const mb=monthBtn('history',all,'pts');
+  return `<h1 class="page">היסטוריה 📜</h1><div class="note" style="margin-top:-6px">כל התנועות: נקודות וכסף בקופה</div><div class="row2"><button class="btn or" data-act="bonus">⭐ + בונוס</button>${mb.html}</div><h2>${mb.m.label}</h2>${ledgerRows(mb.m.items,'hist')}`},
+bank(){const mb=monthBtn('bank',S.money,'₪');
+  return `<h1 class="page">הקופה אצל אבא 🏦</h1>
+  <div class="bal" style="margin-bottom:12px"><small>הכסף שלי אצל אבא</small><div class="big">₪${fN(CASH())}</div><div class="sub"><span class="pill">שער: ${fN(S.ratio)} נק' = ₪1</span><span class="pill">⚡ ${fN(PTS())} נק' = ₪${fN(toCash(PTS()))}</span></div></div>
+  <div class="row2"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button>${mb.html}</div>
+  <button class="btn" style="margin-top:10px" data-act="moneyadd">± הפקדה / משיכה</button>
+  ${pendingList(['convert'])}<h2>${mb.m.label}</h2>
+  ${mb.m.items.length?`<div class="list">${mb.m.items.map(x=>`<div class="li"><div class="ic">${x.icon||'💵'}</div><div class="t"><b>${esc(x.name)}</b><small>${fD(x.ts)}${x.by?' · נרשם ע"י '+x.by:''}${x.note?' · '+esc(x.note):''}</small></div><span class="v ${x.amt>=0?'plus':'minus'}">₪${fN(x.amt)}</span><div class="acts"><button data-act="medit" data-id="${x.id}">✏️</button><button data-act="mdel" data-id="${x.id}">🗑️</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">אין תנועות בחודש הזה</div></div>`}`},
+admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
+  const dp=S.dreams.filter(d=>d.ok===false).length;
+  const tabs=[['dreams',`חלומות${dp?' ('+dp+')':''}`],['tasks','משימות'],['rewards','חנות'],['surprises','הגרלה'],['settings','הגדרות']];
+  let body='';
+  if(adminTab==='approve'){const r=S.requests.slice().sort((a,b)=>(a.status==='pending'?0:1)-(b.status==='pending'?0:1)||b.ts-a.ts).slice(0,40);
+    const K={task:'משימה',reward:'חנות',surprise:'הגרלה',convert:'המרה לכסף'};
+    body=r.length?`<div class="list">${r.map(x=>`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${K[x.kind]} · ${fD(x.ts)}${x.kind==='convert'?` · ₪${fN(x.amt)}`:''}</small></div><span class="v ${x.kind==='reward'||x.kind==='convert'?'minus':'plus'}">${x.pts?(x.kind==='reward'||x.kind==='convert'?'-':'+')+fN(x.pts):''}</span>${x.status==='pending'?`<div class="acts"><button data-act="ok" data-id="${x.id}" title="אושר">✅</button><button data-act="no" data-id="${x.id}" title="לא אושר">❌</button></div>`:`<span class="badge ${x.status==='approved'?'b-ok':'b-no'}">${x.status==='approved'?'אושר':'נדחה'}</span>`}</div>`).join('')}</div>`:`<div class="list"><div class="empty">אין בקשות. שקט חשוד... 🕵️</div></div>`}
+  if(adminTab==='dreams'){const L=S.dreams.slice().sort((a,b)=>(a.ok===false?0:1)-(b.ok===false?0:1)||b.ts-a.ts);
+    body=`<div class="note">חלומות חדשים שבן הציע מחכים לאישור התמחור. ✅ מאשר, ✏️ משנה מחיר ומאשר, ❌ לא מאשר.</div><div class="list">${L.length?L.map(d=>`<div class="li"><div class="ic">${d.icon||'🚀'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)}${d.notes?' · '+esc(d.notes):''}</small></div><span class="v">${fN(d.target)} נק'</span>${d.ok===false?`<div class="acts"><button data-act="dok" data-id="${d.id}">✅</button><button data-act="dprice" data-id="${d.id}">✏️</button><button data-act="dno" data-id="${d.id}">❌</button></div>`:`<span class="badge b-ok">מאושר</span>`}</div>`).join(''):'<div class="empty">אין חלומות עדיין</div>'}</div>`}
+  if(adminTab==='tasks'||adminTab==='rewards'){const L=S[adminTab];
+    body=`<button class="btn pri" data-act="anew">+ ${adminTab==='tasks'?'משימה':'פרס'} חדש${adminTab==='tasks'?'ה':''}</button><div class="list" style="margin-top:10px">${L.length?L.map(x=>`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${esc(x.desc||'')}</small></div><span class="v ${adminTab==='tasks'?'plus':''}">${fN(x.pts)} נק'${perTxt(x)}</span><div class="acts"><button data-act="aedit" data-id="${x.id}">✏️</button><button data-act="adel" data-id="${x.id}">🗑️</button></div></div>`).join(''):'<div class="empty">הרשימה ריקה</div>'}</div>`}
+  if(adminTab==='surprises'){const F=Object.entries(S.fixedDraws||{}).sort();body=`<button class="btn pri" data-act="snew">+ הפתעה חדשה</button>
+    <h2>📅 הגרלה מכוונת לתאריך</h2><div class="note">ביום שתבחר ההגרלה תיתן בדיוק את מספר הנקודות שקבעת (היום מתחלף בחצות).</div>
+    <div class="list" style="margin-bottom:10px">${F.length?F.map(([dt,v])=>`<div class="li"><div class="ic">📅</div><div class="t"><b>${dt.split('-').reverse().join('/')}</b></div><span class="v plus">+${fN(v)}</span><div class="acts"><button data-act="fxdel" data-id="${dt}">🗑️</button></div></div>`).join(''):'<div class="empty">אין</div>'}</div>
+    <button class="btn" data-act="fxnew">+ הוסף תאריך</button><h2>🎁 רשימת ההגרלה הרגילה</h2><div class="note">אפשר לתת להפתעה נקודות (נכנסות מיד), או 0 להפתעה שאינה נקודות.</div><div class="list">${S.surprises.length?S.surprises.map(x=>`<div class="li"><div class="ic">🎁</div><div class="t"><b>${esc(x.text)}</b></div><span class="v plus">${x.pts?'+'+fN(x.pts):''}</span><div class="acts"><button data-act="sedit" data-id="${x.id}">✏️</button><button data-act="sdel" data-id="${x.id}">🗑️</button></div></div>`).join(''):'<div class="empty">אין הפתעות ברשימה</div>'}</div>`}
+  if(adminTab==='settings'){body=`<div class="list" style="padding:14px">
+    <div class="fld"><label>📱 תאריך יום ההולדת ה-14 של בן (לחישוב הטיקטוק)</label><input id="tt14" type="date" value="${esc(S.tiktok14||'')}"></div><div class="note" style="margin-top:-6px">המרה: 1 נק' = ₪1, רק מנקודות לכסף.</div>
+    <div class="fld"><label>קוד אבא (PIN)</label><input id="pin" inputmode="numeric" value="${esc(S.pin)}"></div>
+    <button class="btn pri" data-act="setsave">שמור הגדרות</button></div>
+    <h2>💾 גיבוי</h2><div class="note">הנתונים נשמרים בדפדפן של המכשיר הזה. כדי להעביר למכשיר אחר או לשמור עותק: העתק את קוד הגיבוי, ובמכשיר השני הדבק ולחץ "שחזר".</div>
+    <div class="row2" style="grid-auto-rows:auto"><button class="btn" style="min-height:0" data-act="bcopy">📋 העתק גיבוי</button><button class="btn" style="min-height:0" data-act="brestore">♻️ שחזר מגיבוי</button></div>
+    <button class="btn ghost" style="margin-top:14px;color:var(--red)" data-act="reset">🧨 איפוס מלא של האפליקציה</button>`}
+  return `<h1 class="page">Admin Only 🔐</h1><div class="tabs">${tabs.map(([k,t])=>`<button class="${adminTab===k?'on':''}" data-tab="${k}">${t}</button>`).join('')}</div>${body}`}
+};
+function render(){renderNav();$('#view').innerHTML=`<div id="netbar" class="pill" style="display:${net?'none':'block'};margin-top:10px;border-color:#ffb02e;color:#ffb02e;text-align:center;border-radius:12px;padding:8px">📡 אין חיבור לאינטרנט. השינויים שמורים בטלפון ויעלו לשרת כשהחיבור יחזור</div>`+V[route]()}
+
+/* ============ dreams calc ============ */
+function taskById(id){return S.tasks.find(t=>t.id===id)}
+function dreamHave(d,c){c=c||d.calc||{};const tasksP=Object.entries(c.counts||{}).reduce((a,[id,n])=>a+(taskById(id)?taskById(id).pts*n:0),0);
+  return Math.max(0,PTS())+tasksP+num(c.dad)+num(c.mom)}
+function openCalc(d){const c=JSON.parse(JSON.stringify(d.calc||{dad:0,mom:0,counts:{}}));c.counts=c.counts||{};
+  const ov=modal(`<h3>מחשבון חלומות</h3>
+  <div class="sum">
+   <div class="r"><span>החלום שלי</span><b>${esc(d.name)}</b></div>
+   <div class="r"><span>מחיר היעד</span><b>${fN(d.target)} נק'</b></div>
+   <div class="r"><span>הנקודות שלי</span><b>${fN(Math.max(0,PTS()))} נק'</b></div>
+   <div class="r"><span>משימות מתוכננות</span><b id="cT"></b></div>
+   <div class="r"><span>אבא יצ'פר (נק')</span><input id="cD" inputmode="decimal" value="${c.dad||''}" placeholder="0"></div>
+   <div class="r"><span>אמא תצ'פר (נק')</span><input id="cM" inputmode="decimal" value="${c.mom||''}" placeholder="0"></div>
+   <div class="r tot"><span>יש לי</span><b id="cH"></b></div>
+   <div class="r miss"><span>חסר לי</span><b id="cX"></b></div>
+  </div>
+  <div class="row2" style="grid-auto-rows:auto;margin-bottom:12px"><button class="btn sm" style="width:100%;min-height:0" data-q="half">חצי עליי, רבע מכל הורה</button><button class="btn sm" style="width:100%;min-height:0" data-q="third">שליש מכל אחד</button></div>
+  <h2 style="margin-top:4px">כמה משימות אני מתכנן?</h2>
+  <div class="list" style="margin-bottom:14px">${S.tasks.map(t=>`<div class="li"><div class="ic">${t.icon}</div><div class="t"><b>${esc(t.name)}</b><small>${fN(t.pts)} נק'${perTxt(t)}${t.unit?' (מונה = '+esc(t.unit)+')':''}</small></div><div class="cnt"><button data-c="-1" data-id="${t.id}">−</button><output id="n_${t.id}">${c.counts[t.id]||0}</output><button data-c="1" data-id="${t.id}">+</button></div></div>`).join('')||'<div class="empty">אין משימות</div>'}</div>
+  <button class="btn pri" data-sv>שמור שינויים</button>`);
+  const D=ov.querySelector('#cD'),M=ov.querySelector('#cM');
+  const upd=()=>{c.dad=num(D.value);c.mom=num(M.value);const tp=Object.entries(c.counts).reduce((a,[id,n])=>a+(taskById(id)?taskById(id).pts*n:0),0);
+    ov.querySelector('#cT').textContent=`${fN(tp)} נק'`;const h=dreamHave(d,c);ov.querySelector('#cH').textContent=fN(h)+' נק\'';
+    const x=Math.max(0,d.target-h);ov.querySelector('#cX').textContent=x?fN(x)+' נק\'':'כלום! 🎉 החלום בהישג יד';};
+  D.addEventListener('input',upd);M.addEventListener('input',upd); // עדכון בלי לרנדר מחדש — אפשר להקליד כמה ספרות ברצף
+  ov.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const T=num(d.target),v=b.dataset.q==='half'?T/4:T/3;D.value=M.value=Math.round(v*100)/100;upd()}); // מחושב ממחיר היעד, לא מהיתרה
+  ov.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{const id=b.dataset.id;c.counts[id]=Math.max(0,(c.counts[id]||0)+num(b.dataset.c));ov.querySelector('#n_'+id).textContent=c.counts[id];upd()});
+  ov.querySelector('[data-sv]').onclick=()=>{upd();d.calc=c;save();ov.remove();render()};
+  upd()}
+
+/* ============ flows ============ */
+function pinGate(){const ov=modal(`<h3>רק לאבא 🔐</h3><div class="fld"><label>קוד</label><input id="pp" type="password" inputmode="numeric" autocomplete="off"></div><button class="btn or" data-sv>כניסה</button>`,{center:true});
+  const i=ov.querySelector('#pp');setTimeout(()=>i.focus(),80);
+  const tryIt=()=>{if(i.value===String(S.pin)){ov.remove();admin=true;route='admin';if(S.dreams.some(d=>d.ok===false))adminTab='dreams';render()}else{ov.remove();alertBox('אופס! ניסית לפרוץ לכספת? אין מעבר!','🚨')}};
+  ov.querySelector('[data-sv]').onclick=tryIt;i.onkeydown=e=>{if(e.key==='Enter')tryIt()}}
+function drawFlow(){const today=dayKey();
+  if(S.draw&&S.draw.day===today){showPrize(S.draw,false);alertBox('בן, הקזינו פתוח פעם אחת ביום! תחזור מחר','🎰','סבבה');setTimeout(()=>{const o=[...document.querySelectorAll('.ov')].pop();o&&o.querySelector('.alert p').insertAdjacentHTML('afterend',`<div class="note" style="margin:-6px 0 14px">נפתח שוב בעוד <b class="cdn" style="color:var(--cyan)">${toMidnight()}</b></div>`)},0);return}
+  if(!S.surprises.length&&!(S.fixedDraws||{})[today]){alertBox('אין הפתעות ברשימה. אבא צריך להוסיף 😅','🤷');return}
+  const fx=(S.fixedDraws||{})[today];const s=fx?{text:`+${fN(fx)} נקודות 🎉`,pts:fx}:S.surprises[Math.random()*S.surprises.length|0];S.draw={day:today,text:s.text,pts:num(s.pts),claimed:true};if(S.draw.pts)addLedger('surprise','הגרלה: '+s.text,s.pts,'🎰');save();render();showPrize(S.draw,true)}
+function showPrize(d,fresh){
+  const ov=modal(`<div class="prize"><div class="pe">🎁</div><div class="note">${fresh?'ההגרלה של היום...':'ההפתעה שקיבלת היום:'}</div><div class="pt">${esc(d.text)}</div>${d.pts?`<div class="pp">${fresh?'נכנסו לכספת! 🎉':'כבר בכספת ✔️'}</div>`:''}</div>
+  <div class="note" style="text-align:center;margin:0 0 10px">⏳ ההגרלה הבאה נפתחת בחצות, בעוד <b class="cdn" style="color:var(--cyan)">${toMidnight()}</b></div>
+  <button class="btn pri" data-act="close">יש! 🤑</button>`,{center:true});
+  if(fresh)boom();
+}
+function taskPick(){const ov=modal(`<h3>ג'וב קטן, תוצאה גדולה!</h3>${S.tasks.length?`<div class="cards">${S.tasks.map(t=>`<div class="card"><div class="ce">${t.icon}</div><b>${esc(t.name)}</b><small>${esc(t.desc||'')}${t.weekMin?`<br><span style="color:var(--cyan)">השבוע: ${weekCount(t.id)} פעמים</span>`:''}</small><div class="cf"><button class="btn sm pri" data-done="${t.id}">ביצעתי</button><span class="p">+${fN(t.pts)}${perTxt(t)}</span></div></div>`).join('')}</div>`:'<div class="empty">אין משימות עדיין</div>'}`);
+  const done=(name,pts,t,extra,msg)=>{addLedger('task',name,pts,t.icon,'',Object.assign({tid:t.id},extra||{}));save();render();boom();
+    setTimeout(()=>alertBox(msg||`כל הכבוד, אלוף! +${fN(pts)} נק' נכנסו לכספת`,'🏆','יאללה'),350)};
+  ov.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>{const t=taskById(b.dataset.done);ov.remove();
+    if(t.unit){qtyAsk(t,'נכנס לכספת',q=>done(`${t.name} · ${fN(q)} ${t.unit==='דקה'?'דקות':t.unit}`,q*t.pts,t,{qty:q}));return}
+    if(t.weekMin){const n=weekCount(t.id)+1;if(n<=t.weekMin){done(`${t.name} (${n}/${t.weekMin} השבוע)`,0,t,null,`נרשם! ${n} מתוך ${t.weekMin} השבוע. מהפעם ה-${t.weekMin+1} מתחילות הנקודות 💪`);return}
+      done(`${t.name} (פעם ${n} השבוע)`,t.pts,t);return}
+    done(t.name,t.pts,t)})}
+function buy(id){const r=S.rewards.find(x=>x.id===id),p=PTS();if(!r)return;
+  if(r.unit){qtyAsk(r,'יורד מהיתרה',q=>{const c=q*r.pts;if(c>p){alertBox(`חסרות לך ${fN(c-p)} נק'. יאללה, למשימות! 💪`,'🪙');return}
+    addLedger('reward',`${r.name} · ${fN(q)} ${r.unit==='דקה'?'דקות':r.unit==='יום'?'ימים':r.unit}`,-c,r.icon,'',{qty:q,rid:r.id,tag:r.tag||''});save();render();alertBox(`תתחדש! ${fN(c)} נק' ירדו מהכספת. תראה לאבא כדי לממש`,'🛒','מגניב')});return}
+  if(p<r.pts){alertBox(`חסרות לך ${fN(r.pts-p)} נק'. יאללה, למשימות! 💪`,'🪙');return}
+  ask(`לקנות "${r.name}" ב-${fN(r.pts)} נק'?`,()=>{addLedger('reward',r.name,-r.pts,r.icon,'',{rid:r.id});save();render();alertBox(`תתחדש! ${fN(r.pts)} נק' ירדו מהכספת. תראה לאבא כדי לממש`,'🛒','מגניב')},'כן, אני רוצה!')}
+function convertFlow(){const ov=modal(`<h3>המר נקודות לכסף ⚡</h3><div class="note">השער: ${fN(S.ratio)} נק' = ₪1 · יש לך ${fN(PTS())} נק'</div>
+  <div class="fld"><label>כמה נקודות להמיר?</label><input id="cv" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>תקבל לקופה</small><div class="big" id="cvo" style="font-size:34px">₪0</div></div><button class="btn cy" data-sv>המר עכשיו</button>`);
+  const i=ov.querySelector('#cv');i.addEventListener('input',()=>ov.querySelector('#cvo').textContent='₪'+fN(toCash(num(i.value))));setTimeout(()=>i.focus(),80);
+  ov.querySelector('[data-sv]').onclick=()=>{const p=Math.floor(num(i.value));if(p<=0)return;if(p>PTS()){alertBox('אין לך כל כך הרבה נקודות 😅','🪙');return}
+    addLedger('convert','המרה לכסף',-p,'⚡');S.money.push({id:uid(),ts:Date.now(),name:`המרת ${fN(p)} נק'`,amt:toCash(p),icon:'⚡'});save();ov.remove();render();alertBox(`₪${fN(toCash(p))} נכנסו לקופה אצל אבא 💰`,'⚡','מעולה')}}
+function decide(id,ok){const r=S.requests.find(x=>x.id===id);if(!r||r.status!=='pending')return;
+  if(ok){if((r.kind==='reward'||r.kind==='convert')&&PTS()<r.pts){alertBox('אין לו מספיק נקודות כרגע לבקשה הזו','⚠️');return}
+    if(r.kind==='task')addLedger('task',r.name,r.pts,r.icon);
+    if(r.kind==='surprise'&&r.pts)addLedger('surprise','הגרלה: '+r.name,r.pts,'🎰');
+    if(r.kind==='reward')addLedger('reward',r.name,-r.pts,r.icon);
+    if(r.kind==='convert'){addLedger('convert','המרה לכסף',-r.pts,'⚡');S.money.push({id:uid(),ts:Date.now(),name:r.name,amt:num(r.amt),icon:'⚡'})}}
+  r.status=ok?'approved':'rejected';r.dts=Date.now();save();render()}
+function notices(){if(admin)return;if(S.inbox&&S.inbox.length){const m=S.inbox.splice(0);save();modal(`<h3>עדכון מאבא 📬</h3><div class="list" style="margin-bottom:12px">${m.map(t=>`<div class="li"><div class="t"><b style="white-space:normal">${esc(t)}</b></div></div>`).join('')}</div><button class="btn pri" data-act="close">סבבה</button>`,{center:true});if(m.some(t=>t.startsWith('✅')))boom();return}const r=S.requests.filter(x=>x.status!=='pending'&&!x.seen);if(!r.length)return;r.forEach(x=>x.seen=true);save();
+  modal(`<h3>עדכון מאבא 📬</h3><div class="list" style="margin-bottom:12px">${r.map(x=>`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${x.status==='approved'?(x.pts?(x.kind==='reward'||x.kind==='convert'?'-':'+')+fN(x.pts)+' נק\'':''):'אולי בפעם הבאה'}</small></div><span class="badge ${x.status==='approved'?'b-ok':'b-no'}">${x.status==='approved'?'אושר ✅':'נדחה ❌'}</span></div>`).join('')}</div><button class="btn pri" data-act="close">סבבה</button>`,{center:true});
+  if(r.some(x=>x.status==='approved'))boom()}
+const HMSG={task:['היי, היסטוריה לא משנים! את שלך עשית ובגדול','מה שהושלם – קדוש! אין מה לגעת בזה יותר...'],hist:['מנסה לטשטש ראיות? תשכח מזה!','מנסה למחוק ראיות? לא היום, אחי.']};
+function findL(id){return S.ledger.find(x=>x.id===id)}
+
+/* ============ events ============ */
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]');if(g){closeTop();go(g.dataset.go);return}
+  const tb=e.target.closest('[data-tab]');if(tb){adminTab=tb.dataset.tab;render();return}
+  const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  switch(a){
+  case'close':closeTop(b);break;
+  case'adminbtn':admin?go('admin'):pinGate();break;
+  case'lock':admin=false;route='home';render();notices();break;
+  case'draw':drawFlow();break;
+  case'taskpick':taskPick();break;
+  case'buy':buy(id);break;
+  case'convert':convertFlow();break;
+  case'mprev':moff[b.dataset.k]--;render();break;
+  case'mnext':if(moff[b.dataset.k]<0){moff[b.dataset.k]++;render()}break;
+  case'bonus':if(guard('להפקיד לעצמך נקודות? יצירתי, אבל חסום!'))form('⭐ נקודות בונוס',[{label:'סיבה',val:'',req:true,ph:'למשל: עזרת לסבתא'},{label:'נקודות (אפשר מינוס לקנס)',val:'',num:true},{label:'הערות',val:'',type:'area'}],v=>{if(!v[1])return false;addLedger('bonus',v[0],v[1],v[1]>=0?'⭐':'⚠️',v[2])},'הוסף');break;
+  case'ledit':{const x=findL(id);if(!x)break;if(guard(HMSG[b.dataset.c==='task'?'task':'hist'][0]))form('עריכת תנועה',[{label:'שם',val:x.name,req:true},{label:'נקודות',val:x.pts,num:true},{label:'הערות',val:x.note,type:'area'}],v=>{x.name=v[0];x.pts=v[1];x.note=v[2];x.icon=x.icon});break}
+  case'ldel':{const x=findL(id);if(!x)break;if(guard(HMSG[b.dataset.c==='task'?'task':'hist'][1]))ask(`למחוק את "${x.name}"?`,()=>{S.ledger=S.ledger.filter(y=>y.id!==id);save();render()});break}
+  case'moneyadd':form('± תנועה בקופה',[{label:'סוג',type:'select',val:'in',opts:[{v:'in',t:'💵 הפקדה (מתנה, דמי כיס...)'},{v:'out',t:'🛍️ משיכה / קנייה'}]},{label:'תיאור',val:'',req:true},{label:'סכום ₪',val:'',num:true,req:true},{label:'הערות',val:'',type:'area'}],v=>{S.money.push({id:uid(),ts:Date.now(),name:v[1],amt:v[0]==='out'?-Math.abs(v[2]):Math.abs(v[2]),icon:v[0]==='out'?'🛍️':'💵',note:v[3],by:admin?'אבא':'בן'})},'שמור');break;
+  case'medit':{const x=S.money.find(y=>y.id===id);if(!x)break;if(guard('לערוך את הבנק של עצמך? יצירתי, אבל חסום!'))form('עריכת תנועה',[{label:'תיאור',val:x.name,req:true},{label:'סכום ₪ (מינוס = משיכה)',val:x.amt,num:true},{label:'הערות',val:x.note,type:'area'}],v=>{x.name=v[0];x.amt=v[1];x.note=v[2]});break}
+  case'mdel':{const x=S.money.find(y=>y.id===id);if(!x)break;if(guard('למה למחוק כסף שבא באהבה? לך תחבק את אבא'))ask(`למחוק את "${x.name}"?`,()=>{S.money=S.money.filter(y=>y.id!==id);save();render()});break}
+  case'dreamnew':form('חולם. כובש. 🚀',[{label:'החלום',val:'',req:true,ph:'למשל: אוזניות חדשות'},{label:'מחיר יעד בנקודות',val:'',num:true,req:true},{label:'הערות',val:'',type:'area'}],v=>{S.dreams.push({id:uid(),ts:Date.now(),name:v[0],target:v[1],notes:v[2],icon:'🚀',ok:admin,calc:{dad:0,mom:0,counts:{}}});if(!admin)setTimeout(()=>alertBox('החלום נשמר! 🚀 אבא צריך לאשר את המחיר, ואז אפשר להתחיל לתכנן','📨','סבבה'),50)},'הוסף חלום');break;
+  case'dedit':{const d=S.dreams.find(x=>x.id===id);if(d)form('עריכת חלום',[{label:'החלום',val:d.name,req:true},{label:'מחיר יעד בנקודות',val:d.target,num:true,req:true},{label:'הערות',val:d.notes,type:'area'}],v=>{if(!admin&&num(v[1])!==num(d.target))d.ok=false;if(admin)d.ok=true;d.name=v[0];d.target=v[1];d.notes=v[2]});break}
+  case'ddel':{const d=S.dreams.find(x=>x.id===id);if(d)ask(`למחוק את החלום "${d.name}"?`,()=>{S.dreams=S.dreams.filter(x=>x.id!==id);save();render()});break}
+  case'calc':{const d=S.dreams.find(x=>x.id===id);if(!d)break;if(d.ok===false){alertBox('המחיר של החלום עוד מחכה לאישור של אבא ⏳','🧮');break}openCalc(d);break}
+  case'dok':{const d=S.dreams.find(x=>x.id===id);if(!d)break;d.ok=true;(S.inbox=S.inbox||[]).push(`✅ החלום "${d.name}" אושר: ${fN(d.target)} נק'`);save();render();break}
+  case'dprice':{const d=S.dreams.find(x=>x.id===id);if(d)form(`תמחור: ${d.name}`,[{label:'מחיר בנקודות',val:d.target,num:true,req:true}],v=>{const ch=num(v[0])!==num(d.target);d.target=v[0];d.ok=true;(S.inbox=S.inbox||[]).push(`✅ החלום "${d.name}" אושר${ch?' במחיר מעודכן':''}: ${fN(d.target)} נק'`)},'אשר במחיר הזה');break}
+  case'dno':{const d=S.dreams.find(x=>x.id===id);if(d)ask(`לא לאשר את "${d.name}"? החלום יימחק`,()=>{S.dreams=S.dreams.filter(x=>x.id!==id);(S.inbox=S.inbox||[]).push(`❌ החלום "${d.name}" לא אושר. אפשר לדבר עם אבא 🙂`);save();render()},'כן, לא מאשר');break}
+  case'ok':decide(id,true);break;
+  case'no':decide(id,false);break;
+  case'anew':case'aedit':{const L=S[adminTab],x=a==='aedit'?L.find(y=>y.id===id):null;
+    form(x?'עריכה':(adminTab==='tasks'?'משימה חדשה':'פרס חדש'),[{label:'אייקון (אימוג\'י)',val:x?x.icon:(adminTab==='tasks'?'🎯':'🎁')},{label:'שם',val:x?x.name:'',req:true},{label:'פירוט',val:x?x.desc:''},{label:adminTab==='tasks'?'נקודות שמקבלים':'מחיר בנקודות',val:x?x.pts:'',num:true,req:true},{label:'לפי יחידה? (למשל: דקה, יום. ריק = מחיר קבוע)',val:x?x.unit:''}].concat(adminTab==='tasks'?[{label:'כמה פעמים בשבוע בלי נקודות לפני שמתחילים לקבל (0 = מיד)',val:x?x.weekMin||0:0,num:true}]:[]),v=>{const o={icon:v[0]||'⭐',name:v[1],desc:v[2],pts:v[3],unit:v[4]||'',weekMin:adminTab==='tasks'?v[5]:0};x?Object.assign(x,o):L.push(Object.assign({id:uid()},o))});break}
+  case'adel':{const L=S[adminTab],x=L.find(y=>y.id===id);if(x)ask(`למחוק את "${x.name}"?`,()=>{S[adminTab]=L.filter(y=>y.id!==id);save();render()});break}
+  case'snew':case'sedit':{const x=a==='sedit'?S.surprises.find(y=>y.id===id):null;form(x?'עריכת הפתעה':'הפתעה חדשה',[{label:'טקסט ההפתעה',val:x?x.text:'',req:true},{label:'נקודות (0 = בלי נקודות)',val:x?x.pts:0,num:true}],v=>{x?Object.assign(x,{text:v[0],pts:v[1]}):S.surprises.push({id:uid(),text:v[0],pts:v[1]})});break}
+  case'fxnew':{const ov=modal(`<h3>הגרלה מכוונת</h3><div class="fld"><label>תאריך</label><input id="fxd" type="date"></div><div class="fld"><label>נקודות</label><input id="fxp" inputmode="numeric"></div><button class="btn pri" data-sv>שמור</button>`);
+    ov.querySelector('[data-sv]').onclick=()=>{const d=ov.querySelector('#fxd').value,v=Math.floor(num(ov.querySelector('#fxp').value));if(!d||v<=0)return;S.fixedDraws[d]=v;save();ov.remove();render()};break}
+  case'fxdel':ask(`למחוק את ההגרלה המכוונת ל-${id.split('-').reverse().join('/')}?`,()=>{delete S.fixedDraws[id];save();render()});break;
+  case'sdel':{const x=S.surprises.find(y=>y.id===id);if(x)ask(`למחוק את "${x.text}"?`,()=>{S.surprises=S.surprises.filter(y=>y.id!==id);save();render()});break}
+  case'setsave':{const p=$('#pin').value.trim();if(!p){alertBox('הקוד חייב להיות מלא','⚠️');break}S.tiktok14=$('#tt14').value;S.pin=p;save();render();alertBox('נשמר ✔️','👍','סגור');break}
+  case'bcopy':{const t=JSON.stringify(S);const done=()=>alertBox('קוד הגיבוי הועתק. שמור אותו במקום בטוח (למשל הודעה לעצמך)','📋');
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(done).catch(()=>showCode(t));else showCode(t);break}
+  case'brestore':{const ov=modal(`<h3>שחזור מגיבוי</h3><div class="fld"><label>הדבק כאן את קוד הגיבוי</label><textarea id="bk" rows="6"></textarea></div><button class="btn or" data-sv>שחזר (מחליף את כל הנתונים)</button>`);
+    ov.querySelector('[data-sv]').onclick=()=>{try{const n=JSON.parse(ov.querySelector('#bk').value);if(!n.tasks)throw 0;ov.remove();ask('לשחזר? כל הנתונים הנוכחיים יוחלפו',()=>{S=n;S.ratio=1;save();render();alertBox('שוחזר בהצלחה','♻️')},'כן, שחזר')}catch(e){alertBox('הקוד לא תקין','⚠️')}};break}
+  case'reset':ask('איפוס מלא ימחק את כל הנקודות, הכסף, החלומות וההיסטוריה. בטוח?',()=>{S=defaults();save();admin=false;route='home';render()},'כן, אפס הכל');break;
+  }
+});
+function showCode(t){modal(`<h3>קוד הגיבוי</h3><div class="note">סמן הכל והעתק ידנית:</div><textarea rows="8" readonly onclick="this.select()">${esc(t)}</textarea>`)}
+
+boot();
+</script>
+</body>
+</html>
