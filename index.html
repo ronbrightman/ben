@@ -11,7 +11,7 @@
 :root{--bg:#08142e;--card:#0f2149;--card2:#152c5e;--line:#22427e;--lime:#6cabdd;--cyan:#bfe2ff;--orange:#ffc845;--red:#ff5a6e;--txt:#f4f8ff;--mut:#93a9d6}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--txt);font-family:Rubik,system-ui,sans-serif;font-size:15px}
-body{min-height:100dvh;background:radial-gradient(120% 55% at 50% 0,#1f4f8f88 0,transparent 65%),radial-gradient(circle at 50% 62%,transparent 0 118px,#6cabdd14 119px 121px,transparent 122px),repeating-linear-gradient(180deg,#ffffff06 0 56px,transparent 56px 112px),var(--bg);background-attachment:fixed}
+body{min-height:100dvh;background:radial-gradient(circle at 50% 60%,transparent 0 118px,#ffffff40 119px 122px,transparent 123px),linear-gradient(180deg,transparent calc(60% - 1.5px),#ffffff40 calc(60% - 1.5px) calc(60% + 1.5px),transparent calc(60% + 1.5px)),repeating-linear-gradient(180deg,#2f8b3c 0 56px,#277a33 56px 112px);background-attachment:fixed}
 button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
 input,textarea,select{font-family:inherit;font-size:16px;color:var(--txt);background:#0a1838;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--cyan)}
@@ -269,7 +269,7 @@ function renderNav(){$('#nav').innerHTML=NAV.map(([k,i,t])=>`<button class="${ro
   $('#chip').innerHTML=admin?`<button data-act="lock">🔓 מצב אבא פעיל · לחץ לנעילה</button>`:''}
 
 /* ============ views ============ */
-const LOGO=`<svg width="46" height="46" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="#fff" stroke="#6cabdd" stroke-width="3"/><path d="M24 15l8.6 6.2-3.3 10.1H18.7l-3.3-10.1z" fill="#08142e"/><path d="M24 15V5.5M32.6 21.2l9-3M29.3 31.3l5.6 7.7M18.7 31.3l-5.6 7.7M15.4 21.2l-9-3" stroke="#08142e" stroke-width="2"/></svg>`;
+const LOGO=`<img src="city.svg" width="54" height="54" alt="" style="filter:drop-shadow(0 2px 6px #0008)">`;
 function monthBtn(k,list,unit){const m=monthOf(list,moff[k]);const sum=m.items.reduce((a,x)=>a+num(unit==='₪'?x.amt:(x.isM?0:x.pts)),0);
   return {m,html:`<div class="month"><button class="arr" data-act="mprev" data-k="${k}" aria-label="חודש קודם">›</button><div class="ml"><b>${m.label}</b><small>${m.items.length} תנועות · ${unit==='₪'?'₪'+fN(sum):(sum>0?'+':'')+fN(sum)+' נק\''}</small></div><button class="arr" data-act="mnext" data-k="${k}" aria-label="חודש הבא" ${moff[k]>=0?'style="opacity:.25"':''}>‹</button></div>`}}
 function pendingList(kinds){const r=S.requests.filter(x=>kinds.includes(x.kind)&&x.status==='pending').sort((a,b)=>b.ts-a.ts);
@@ -278,7 +278,7 @@ function ledgerRows(items,ctx){return items.length?`<div class="list">${items.ma
 
 const V={
 home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
-  return `<div class="logo">${LOGO}<b>הכספת של בן</b></div><div style="text-align:center;margin:-6px 0 10px;color:var(--lime);font-weight:700;font-size:13px;letter-spacing:.5px">💙 תכלת עד הסוף 💙</div>
+  return `<div class="logo">${LOGO}<b>הכספת של בן</b></div><div style="text-align:center;margin:-6px 0 10px;color:#fff;font-weight:900;font-size:14px;letter-spacing:.5px;text-shadow:0 1px 4px #000a">💙 סיטי עד הסוף 💙</div>
   <div class="bal"><small>⚽ היתרה שלי</small><div class="big">${fN(p)} <span>נק'</span></div>
   <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
   <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
