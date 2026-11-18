@@ -162,7 +162,15 @@ function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function migrate(s){s=s&&s.tasks?s:defaults();s.ratio=1;s.fixedDraws=s.fixedDraws||{};
   if(!s.fixedSeed1){s.fixedDraws['2026-11-18']=7;s.fixedSeed1=true}if(!s.tiktok14)s.tiktok14='2028-03-24';
   if(!s.openSet){s.money.push({id:uid(),ts:Date.now(),name:'יתרת פתיחה – הכסף של בן אצל אבא',amt:2260,icon:'💰'});s.openSet=true}
-  ['ledger','money','requests','dreams','surprises','tasks','rewards'].forEach(k=>s[k]=s[k]||[]);return s}
+  ['ledger','money','requests','dreams','surprises','tasks','rewards'].forEach(k=>s[k]=s[k]||[]);
+  if(s.allowAmt==null)s.allowAmt=100;if(!s.allowDone)s.allowDone=monKey(new Date());return s}
+const monKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+// דמי כיס: בכל 1 לחודש נכנס סכום קבוע לקופה. מזהה קבוע לכל חודש כדי ששני מכשירים לא יכפילו
+function allowance(){if(!S||!num(S.allowAmt))return;const now=new Date(),cur=monKey(now);if(!S.allowDone||S.allowDone>=cur)return;
+  let [y,m]=S.allowDone.split('-').map(Number),added=0;
+  while(true){m++;if(m>12){m=1;y++}const k=`${y}-${String(m).padStart(2,'0')}`;if(k>cur)break;
+    if(!S.money.some(x=>x.id==='allow-'+k)){S.money.push({id:'allow-'+k,ts:new Date(y,m-1,1).getTime(),name:'דמי כיס חודשיים',amt:num(S.allowAmt),icon:'💵',by:'אוטומטי'});added++}}
+  S.allowDone=cur;save();if(added&&!document.querySelector('.ov')){render();alertBox(`₪${fN(num(S.allowAmt)*added)} דמי כיס נכנסו לקופה! 💰`,'💵','יש!')}}
 let base=null,S=null,ver='',code=null,net=true,dirty=false,pushing=false,noApi=!/^https?:/.test(location.protocol);
 const cloud=()=>!noApi;
 function cacheIt(){lsSet(CACHE,JSON.stringify({S,ver,dirty,base}))}
@@ -202,9 +210,9 @@ async function boot(){
   const h=location.hash.slice(1);if(h.startsWith('c=')){code=decodeURIComponent(h.slice(2));lsSet(CODEKEY,code);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}else code=lsGet(CODEKEY)||null;
   let c=null;try{c=JSON.parse(lsGet(CACHE)||'null')}catch(e){}
   S=migrate(c&&c.S);ver=c&&c.ver||'';base=c&&c.base||null;dirty=!!(c&&c.dirty);
-  if(!cloud()){render();notices();return}
+  if(!cloud()){render();allowance();notices();return}
   if(!code){askCode();return}
-  render();if(dirty)await push();else await pull(true);notices();
+  render();if(dirty)await push();else await pull(true);allowance();notices();
   setInterval(()=>{if(!document.hidden)pull()},15000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){dirty?push():pull()}});
   addEventListener('online',()=>{dirty?push():pull()})}
@@ -229,7 +237,7 @@ function ttLeft(){const ms=Math.max(0,ttTarget()-Date.now()),s=Math.floor(ms/100
 function tiktokInfo(){const d=tiktokDays(),l=ttLeft();return `${l.done?'הגיע הזמן! 🎉':`עוד ${fN(l.d)} ימים`} · טיקטוק מ-${fD(ttTarget().getTime()).split(' ·')[0]}${d?` · קנית ${fN(d)} ימי הקדמה`:''}`}
 function toMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const s=Math.max(0,Math.floor((m-n)/1000));return `${p2(Math.floor(s/3600))}:${p2(Math.floor(s%3600/60))}:${p2(s%60)}`}
 let lastDay=null;
-setInterval(()=>{document.querySelectorAll('.cdn').forEach(e=>e.textContent=toMidnight());const k=dayKey();if(lastDay&&k!==lastDay&&route==='home'&&!document.querySelector('.ov'))render();lastDay=k},1000);
+setInterval(()=>{document.querySelectorAll('.cdn').forEach(e=>e.textContent=toMidnight());const k=dayKey();if(lastDay&&k!==lastDay){allowance();if(route==='home'&&!document.querySelector('.ov'))render()}lastDay=k},1000);
 setInterval(()=>{const e=document.getElementById('tt');if(!e)return;const l=ttLeft();e.innerHTML=l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`},1000);
 function qtyAsk(x,verb,cb){const ov=modal(`<h3>${x.icon} ${esc(x.name)}</h3><div class="note">${fN(x.pts)} נק'${perTxt(x)}</div><div class="fld"><label>כמה? (${esc(x.unit)})</label><input id="q" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>${verb}</small><div class="big" id="qo" style="font-size:34px">0 <span>נק'</span></div></div><button class="btn pri" data-sv>${verb==='נכנס לכספת'?'יאללה, תוסיף!':'קנה!'}</button>`);
   const i=ov.querySelector('#q');i.addEventListener('input',()=>ov.querySelector('#qo').innerHTML=fN(Math.floor(num(i.value))*x.pts)+' <span>נק\'</span>');setTimeout(()=>i.focus(),80);
@@ -328,6 +336,7 @@ admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
   if(adminTab==='settings'){body=`<div class="list" style="padding:14px">
     <div class="fld"><label>📱 תאריך יום ההולדת ה-14 של בן (לחישוב הטיקטוק)</label><input id="tt14" type="date" value="${esc(S.tiktok14||'')}"></div><div class="note" style="margin-top:-6px">המרה: 1 נק' = ₪1, בשני הכיוונים (נקודות ⇄ כסף).</div>
     <div class="fld"><label>קוד אבא (PIN)</label><input id="pin" inputmode="numeric" value="${esc(S.pin)}"></div>
+    <div class="fld"><label>💵 דמי כיס – נכנס לקופה בכל 1 לחודש (₪, 0 = כבוי)</label><input id="alw" inputmode="numeric" value="${esc(S.allowAmt??100)}"></div>
     <button class="btn pri" data-act="setsave">שמור הגדרות</button></div>
     <h2>💾 גיבוי</h2><div class="note">הנתונים נשמרים בדפדפן של המכשיר הזה. כדי להעביר למכשיר אחר או לשמור עותק: העתק את קוד הגיבוי, ובמכשיר השני הדבק ולחץ "שחזר".</div>
     <div class="row2" style="grid-auto-rows:auto"><button class="btn" style="min-height:0" data-act="bcopy">📋 העתק גיבוי</button><button class="btn" style="min-height:0" data-act="brestore">♻️ שחזר מגיבוי</button></div>
@@ -459,7 +468,7 @@ document.addEventListener('click',e=>{
     ov.querySelector('[data-sv]').onclick=()=>{const d=ov.querySelector('#fxd').value,v=Math.floor(num(ov.querySelector('#fxp').value));if(!d||v<=0)return;S.fixedDraws[d]=v;save();ov.remove();render()};break}
   case'fxdel':ask(`למחוק את ההגרלה המכוונת ל-${id.split('-').reverse().join('/')}?`,()=>{delete S.fixedDraws[id];save();render()});break;
   case'sdel':{const x=S.surprises.find(y=>y.id===id);if(x)ask(`למחוק את "${x.text}"?`,()=>{S.surprises=S.surprises.filter(y=>y.id!==id);save();render()});break}
-  case'setsave':{const p=$('#pin').value.trim();if(!p){alertBox('הקוד חייב להיות מלא','⚠️');break}S.tiktok14=$('#tt14').value;S.pin=p;save();render();alertBox('נשמר ✔️','👍','סגור');break}
+  case'setsave':{const p=$('#pin').value.trim();if(!p){alertBox('הקוד חייב להיות מלא','⚠️');break}S.tiktok14=$('#tt14').value;S.pin=p;S.allowAmt=Math.max(0,Math.floor(num($('#alw').value)));save();render();alertBox('נשמר ✔️','👍','סגור');break}
   case'bcopy':{const t=JSON.stringify(S);const done=()=>alertBox('קוד הגיבוי הועתק. שמור אותו במקום בטוח (למשל הודעה לעצמך)','📋');
     if(navigator.clipboard)navigator.clipboard.writeText(t).then(done).catch(()=>showCode(t));else showCode(t);break}
   case'brestore':{const ov=modal(`<h3>שחזור מגיבוי</h3><div class="fld"><label>הדבק כאן את קוד הגיבוי</label><textarea id="bk" rows="6"></textarea></div><button class="btn or" data-sv>שחזר (מחליף את כל הנתונים)</button>`);
