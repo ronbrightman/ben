@@ -4,23 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>הכספת של בן</title>
+<meta name="theme-color" content="#08142e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Secular+One&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b0d17;--card:#151829;--card2:#1c2036;--line:#272b45;--lime:#c8ff3c;--cyan:#38e1ff;--orange:#ff6b2c;--red:#ff4d6d;--txt:#f2f4ff;--mut:#8b91b3}
+:root{--bg:#08142e;--card:#0f2149;--card2:#152c5e;--line:#22427e;--lime:#6cabdd;--cyan:#bfe2ff;--orange:#ffc845;--red:#ff5a6e;--txt:#f4f8ff;--mut:#93a9d6}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--txt);font-family:Rubik,system-ui,sans-serif;font-size:15px}
-body{min-height:100dvh;background:radial-gradient(120% 60% at 100% 0,#1b2350 0,transparent 60%),radial-gradient(90% 50% at 0 100%,#1d3a1a55 0,transparent 60%),var(--bg)}
+body{min-height:100dvh;background:radial-gradient(120% 55% at 50% 0,#1f4f8f88 0,transparent 65%),radial-gradient(circle at 50% 62%,transparent 0 118px,#6cabdd14 119px 121px,transparent 122px),repeating-linear-gradient(180deg,#ffffff06 0 56px,transparent 56px 112px),var(--bg);background-attachment:fixed}
 button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
-input,textarea,select{font-family:inherit;font-size:16px;color:var(--txt);background:#0f1222;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;outline:none}
+input,textarea,select{font-family:inherit;font-size:16px;color:var(--txt);background:#0a1838;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--cyan)}
 .wrap{max-width:520px;margin:0 auto;padding:0 14px 24px}
 /* top bar */
-.top{position:sticky;top:0;z-index:20;background:#0b0d17e8;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{position:sticky;top:0;z-index:20;background:#08142ee8;backdrop-filter:blur(10px);border-bottom:2px solid var(--lime)}
 .nav{max-width:520px;margin:0 auto;display:flex;justify-content:space-between;padding:6px 8px}
 .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;font-size:11px;color:var(--mut)}
 .nav button span{font-size:20px;filter:grayscale(.3)}
-.nav button.on{color:var(--lime);background:#c8ff3c14}
+.nav button.on{color:var(--lime);background:#6cabdd1f}
 .nav button.on span{filter:none}
 .adminchip{max-width:520px;margin:0 auto;display:flex;justify-content:center;padding:0 0 6px}
 .adminchip button{font-size:12px;background:var(--orange);color:#111;font-weight:700;border-radius:99px;padding:3px 12px}
@@ -28,15 +29,15 @@ h1.page{font-family:'Secular One',Rubik;font-size:22px;line-height:1.25;margin:1
 h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 /* home */
 .logo{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 10px}
-.logo b{font-family:'Secular One';font-size:30px;letter-spacing:.5px;background:linear-gradient(90deg,var(--lime),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
-.bal{background:linear-gradient(135deg,#1a1f3b,#121528);border:1.5px solid var(--line);border-radius:22px;padding:14px;text-align:center;position:relative;overflow:hidden}
-.bal:after{content:"";position:absolute;inset:auto -40px -60px auto;width:160px;height:160px;border-radius:50%;background:#c8ff3c18}
+.logo b{font-family:'Secular One';font-size:30px;letter-spacing:.5px;background:linear-gradient(90deg,#fff,var(--lime));-webkit-background-clip:text;background-clip:text;color:transparent}
+.bal{background:linear-gradient(135deg,#1c3c78,#0e1f47);border:1.5px solid var(--lime);box-shadow:0 8px 28px #6cabdd30;border-radius:22px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.bal:after{content:"";position:absolute;inset:auto -40px -60px auto;width:160px;height:160px;border-radius:50%;background:#6cabdd22}
 .bal small{color:var(--mut)}
-.big{font-family:'Secular One';font-size:46px;line-height:1.1;color:var(--lime)}
+.big{font-family:'Secular One';font-size:46px;line-height:1.1;color:#fff;text-shadow:0 0 18px #6cabdd99}
 .big span{font-size:20px;color:var(--txt)}
 .bal .sub{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:6px}
-.pill{background:#0b0d17aa;border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:13px}
-.drawbtn{width:100%;margin:10px 0;padding:15px;border-radius:18px;font-size:20px;font-weight:900;color:#111;background:linear-gradient(90deg,var(--lime),var(--cyan));box-shadow:0 6px 24px #38e1ff40;animation:pulse 2.2s infinite}
+.pill{background:#08142eaa;border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:13px}
+.drawbtn{width:100%;margin:10px 0;padding:15px;border-radius:18px;font-size:20px;font-weight:900;color:#08142e;background:linear-gradient(90deg,var(--lime),#fff);box-shadow:0 6px 24px #6cabdd55;animation:pulse 2.2s infinite}
 .drawbtn.used{animation:none;opacity:.85}
 @keyframes pulse{50%{transform:scale(1.025)}}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -73,8 +74,8 @@ h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 .acts button{font-size:16px;padding:6px;border-radius:8px;opacity:.85}
 .empty{padding:22px;text-align:center;color:var(--mut);font-size:14px}
 .badge{font-size:11px;border-radius:99px;padding:2px 8px;font-weight:700}
-.b-wait{background:#ffb02e22;color:#ffb02e}.b-ok{background:#c8ff3c22;color:var(--lime)}.b-no{background:#ff4d6d22;color:var(--red)}
-.prog{height:6px;background:#0b0d17;border-radius:9px;margin-top:5px;overflow:hidden}
+.b-wait{background:#ffb02e22;color:#ffb02e}.b-ok{background:#6cabdd22;color:var(--lime)}.b-no{background:#ff4d6d22;color:var(--red)}
+.prog{height:6px;background:#08142e;border-radius:9px;margin-top:5px;overflow:hidden}
 .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--lime),var(--cyan));border-radius:9px}
 /* cards grid */
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -86,10 +87,10 @@ h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 .card .p{font-weight:900;color:var(--lime);white-space:nowrap}
 .card.no{opacity:.55}
 /* modal */
-.ov{position:fixed;inset:0;z-index:50;background:#05060ccc;backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;animation:fade .18s}
+.ov{position:fixed;inset:0;z-index:50;background:#030a1ccc;backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;animation:fade .18s}
 .ov.center{align-items:center}
 @keyframes fade{from{opacity:0}}
-.md{position:relative;width:100%;max-width:480px;background:#12152a;border:1.5px solid var(--line);border-radius:22px;padding:18px 16px 16px;margin:auto 0;animation:pop .22s}
+.md{position:relative;width:100%;max-width:480px;background:#0f2149;border:1.5px solid var(--line);border-radius:22px;padding:18px 16px 16px;margin:auto 0;animation:pop .22s}
 @keyframes pop{from{transform:scale(.92);opacity:0}}
 .md .x{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;background:var(--card2);font-size:14px;color:var(--mut)}
 .md h3{font-family:'Secular One';font-size:22px;margin:4px 30px 14px 0;line-height:1.25}
@@ -98,7 +99,7 @@ h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 .alert{text-align:center;padding:8px 4px 2px}
 .alert .ae{font-size:56px;margin-bottom:6px}
 .alert p{font-size:19px;font-weight:700;line-height:1.4;margin-bottom:16px}
-.md.small{max-width:360px;border-color:var(--orange);box-shadow:0 0 0 4px #ff6b2c22}
+.md.small{max-width:360px;border-color:var(--orange);box-shadow:0 0 0 4px #ffc84522}
 /* draw */
 .prize{text-align:center;padding:10px 0}
 .prize .pe{font-size:64px;animation:spin .8s ease-out}
@@ -258,17 +259,17 @@ function form(title,fields,onSave,btn='שמור'){
 function boom(){
   try{const A=new (window.AudioContext||window.webkitAudioContext)();[523,659,784,1047,1319].forEach((f,i)=>{const o=A.createOscillator(),g=A.createGain();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(A.destination);const t=A.currentTime+i*.09;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.35);o.start(t);o.stop(t+.4)})}catch(e){}
   const c=document.createElement('canvas');c.id='cf';document.body.appendChild(c);const x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
-  const C=['#c8ff3c','#38e1ff','#ff6b2c','#ffffff','#ffd23c','#a06bff'];const P=Array.from({length:170},()=>({x:c.width/2,y:c.height*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*15-4,r:Math.random()*6+4,a:Math.random()*6,va:(Math.random()-.5)*.4,c:C[Math.random()*C.length|0]}));
+  const C=['#6cabdd','#ffffff','#1c2c5b','#bfe2ff','#ffc845','#6cabdd'];const P=Array.from({length:170},()=>({x:c.width/2,y:c.height*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*15-4,r:Math.random()*6+4,a:Math.random()*6,va:(Math.random()-.5)*.4,c:C[Math.random()*C.length|0]}));
   const t0=performance.now();(function f(t){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});t-t0<3000?requestAnimationFrame(f):c.remove()})(t0)}
 
 /* ============ nav ============ */
-const NAV=[['home','🏠','בית'],['tasks','🎯','משימות'],['shop','🛒','חנות'],['dreams','🚀','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
+const NAV=[['home','🏟️','בית'],['tasks','⚽','משימות'],['shop','👕','חנות'],['dreams','🏆','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
 function go(r){if(r==='admin'&&!admin){pinGate();return}route=r;render();scrollTo(0,0)}
 function renderNav(){$('#nav').innerHTML=NAV.map(([k,i,t])=>`<button class="${route===k?'on':''}" data-go="${k}"><span>${i}</span>${t}</button>`).join('');
   $('#chip').innerHTML=admin?`<button data-act="lock">🔓 מצב אבא פעיל · לחץ לנעילה</button>`:''}
 
 /* ============ views ============ */
-const LOGO=`<svg width="46" height="46" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8ff3c"/><stop offset="1" stop-color="#38e1ff"/></linearGradient></defs><rect x="3" y="3" width="42" height="42" rx="13" fill="url(#g)"/><circle cx="24" cy="24" r="12" fill="#0b0d17"/><circle cx="24" cy="24" r="8" fill="none" stroke="#c8ff3c" stroke-width="2.5" stroke-dasharray="3 3"/><path d="M26 15l-7 10h5l-2 8 7-10h-5z" fill="#c8ff3c"/></svg>`;
+const LOGO=`<svg width="46" height="46" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="#fff" stroke="#6cabdd" stroke-width="3"/><path d="M24 15l8.6 6.2-3.3 10.1H18.7l-3.3-10.1z" fill="#08142e"/><path d="M24 15V5.5M32.6 21.2l9-3M29.3 31.3l5.6 7.7M18.7 31.3l-5.6 7.7M15.4 21.2l-9-3" stroke="#08142e" stroke-width="2"/></svg>`;
 function monthBtn(k,list,unit){const m=monthOf(list,moff[k]);const sum=m.items.reduce((a,x)=>a+num(unit==='₪'?x.amt:(x.isM?0:x.pts)),0);
   return {m,html:`<div class="month"><button class="arr" data-act="mprev" data-k="${k}" aria-label="חודש קודם">›</button><div class="ml"><b>${m.label}</b><small>${m.items.length} תנועות · ${unit==='₪'?'₪'+fN(sum):(sum>0?'+':'')+fN(sum)+' נק\''}</small></div><button class="arr" data-act="mnext" data-k="${k}" aria-label="חודש הבא" ${moff[k]>=0?'style="opacity:.25"':''}>‹</button></div>`}}
 function pendingList(kinds){const r=S.requests.filter(x=>kinds.includes(x.kind)&&x.status==='pending').sort((a,b)=>b.ts-a.ts);
@@ -277,20 +278,20 @@ function ledgerRows(items,ctx){return items.length?`<div class="list">${items.ma
 
 const V={
 home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
-  return `<div class="logo">${LOGO}<b>הכספת של בן</b></div>
-  <div class="bal"><small>היתרה שלי</small><div class="big">${fN(p)} <span>נק'</span></div>
+  return `<div class="logo">${LOGO}<b>הכספת של בן</b></div><div style="text-align:center;margin:-6px 0 10px;color:var(--lime);font-weight:700;font-size:13px;letter-spacing:.5px">💙 תכלת עד הסוף 💙</div>
+  <div class="bal"><small>⚽ היתרה שלי</small><div class="big">${fN(p)} <span>נק'</span></div>
   <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
   <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המר נקודות לכסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
-  <button class="drawbtn ${d?'used':''}" data-act="draw">🎰 ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'הגרלה יומית!'}</button>
-  <div class="grid3">${[['tasks','🎯','משימות'],['shop','🛒','חנות'],['dreams','🚀','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
+  <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'פנדל יומי – הגרלה!'}</button>
+  <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['dreams','🏆','חלומות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
 tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
-  return `<h1 class="page">משימות 🎯</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">🎯 משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
+  return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
 shop(){const p=PTS();
-  return `<h1 class="page">החנות של בן 🛒</h1><div class="note" style="margin-top:-6px">יש לך <b style="color:var(--lime)">${fN(p)} נק'</b> לבזבז. בוחרים, אבא מאשר, הנקודות יורדות.</div>
+  return `<h1 class="page">חנות האוהדים 👕</h1><div class="note" style="margin-top:-6px">יש לך <b style="color:var(--lime)">${fN(p)} נק'</b> לבזבז. בוחרים, אבא מאשר, הנקודות יורדות.</div>
   ${S.rewards.length?`<div class="cards">${S.rewards.map(r=>`<div class="card ${p<r.pts?'no':''}"><div class="ce">${r.icon}</div><b>${esc(r.name)}</b><small>${esc(r.desc||'')}${r.tag==='tiktok'?`<br><span style="color:var(--cyan)">${esc(tiktokInfo())}</span>`:''}</small><div class="cf"><span class="p">${fN(r.pts)} נק'${perTxt(r)}</span><button class="btn sm cy" data-act="buy" data-id="${r.id}">אני רוצה!</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">החנות ריקה כרגע. אבא, תמלא מדפים 😉</div></div>`}
   ${pendingList(['reward'])}`},
 dreams(){return `<h1 class="page">הדרך היחידה להגשים חלום היא להתעורר ולעבוד עליו!</h1>
-  <button class="btn cy" style="min-height:56px;font-size:17px" data-act="dreamnew">🚀 אני רוצה להתעורר!</button>
+  <button class="btn cy" style="min-height:56px;font-size:17px" data-act="dreamnew">🏆 אני רוצה להתעורר!</button>
   <h2>החלומות שלי</h2>${S.dreams.length?`<div class="list">${S.dreams.slice().sort((a,b)=>b.ts-a.ts).map(d=>{const h=dreamHave(d),pc=Math.min(100,d.target?h/d.target*100:0);
     return `<div class="li"><div class="ic">${d.icon||'🚀'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)} · ${d.ok===false?'<span class="badge b-wait">ממתין לאישור מחיר</span>':Math.round(pc)+'%'}</small><div class="prog"><i style="width:${pc}%"></i></div></div><span class="v">${fN(d.target)} נק'</span><div class="acts"><button data-act="calc" data-id="${d.id}">🧮</button><button data-act="dedit" data-id="${d.id}">✏️</button><button data-act="ddel" data-id="${d.id}">🗑️</button></div></div>`}).join('')}</div>`:`<div class="list"><div class="empty">אין עדיין חלומות. על מה אתה חולם? 💭</div></div>`}`},
 history(){const all=S.ledger.concat(S.money.map(x=>Object.assign({},x,{isM:1})));const mb=monthBtn('history',all,'pts');
@@ -367,7 +368,7 @@ function pinGate(){const ov=modal(`<h3>רק לאבא 🔐</h3><div class="fld"><
   const tryIt=()=>{if(i.value===String(S.pin)){ov.remove();admin=true;route='admin';if(S.dreams.some(d=>d.ok===false))adminTab='dreams';render()}else{ov.remove();alertBox('אופס! ניסית לפרוץ לכספת? אין מעבר!','🚨')}};
   ov.querySelector('[data-sv]').onclick=tryIt;i.onkeydown=e=>{if(e.key==='Enter')tryIt()}}
 function drawFlow(){const today=dayKey();
-  if(S.draw&&S.draw.day===today){showPrize(S.draw,false);alertBox('בן, הקזינו פתוח פעם אחת ביום! תחזור מחר','🎰','סבבה');setTimeout(()=>{const o=[...document.querySelectorAll('.ov')].pop();o&&o.querySelector('.alert p').insertAdjacentHTML('afterend',`<div class="note" style="margin:-6px 0 14px">נפתח שוב בעוד <b class="cdn" style="color:var(--cyan)">${toMidnight()}</b></div>`)},0);return}
+  if(S.draw&&S.draw.day===today){showPrize(S.draw,false);alertBox('בן, פנדל אחד ביום! תחזור מחר לבעוט שוב','⚽','סבבה');setTimeout(()=>{const o=[...document.querySelectorAll('.ov')].pop();o&&o.querySelector('.alert p').insertAdjacentHTML('afterend',`<div class="note" style="margin:-6px 0 14px">נפתח שוב בעוד <b class="cdn" style="color:var(--cyan)">${toMidnight()}</b></div>`)},0);return}
   if(!S.surprises.length&&!(S.fixedDraws||{})[today]){alertBox('אין הפתעות ברשימה. אבא צריך להוסיף 😅','🤷');return}
   const fx=(S.fixedDraws||{})[today];const s=fx?{text:`+${fN(fx)} נקודות 🎉`,pts:fx}:S.surprises[Math.random()*S.surprises.length|0];S.draw={day:today,text:s.text,pts:num(s.pts),claimed:true};if(S.draw.pts)addLedger('surprise','הגרלה: '+s.text,s.pts,'🎰');save();render();showPrize(S.draw,true)}
 function showPrize(d,fresh){
