@@ -287,7 +287,7 @@ home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
 tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
   return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
 shop(){const p=PTS();
-  return `<h1 class="page">חנות האוהדים 👕</h1><div class="note" style="margin-top:-6px">יש לך <b style="color:var(--lime)">${fN(p)} נק'</b> לבזבז. בוחרים, אבא מאשר, הנקודות יורדות.</div>
+  return `<h1 class="page">חנות האוהדים 👕</h1><div class="note" style="margin-top:-6px">יש לך <b style="color:var(--lime)">${fN(p)} נק'</b> לבזבז. בוחרים, הנקודות יורדות מיד, וזה שלך!</div>
   ${S.rewards.length?`<div class="cards">${S.rewards.map(r=>`<div class="card ${p<r.pts?'no':''}"><div class="ce">${r.icon}</div><b>${esc(r.name)}</b><small>${esc(r.desc||'')}${r.tag==='tiktok'?`<br><span style="color:var(--cyan)">${esc(tiktokInfo())}</span>`:''}</small><div class="cf"><span class="p">${fN(r.pts)} נק'${perTxt(r)}</span><button class="btn sm cy" data-act="buy" data-id="${r.id}">אני רוצה!</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">החנות ריקה כרגע. אבא, תמלא מדפים 😉</div></div>`}
   ${pendingList(['reward'])}`},
 dreams(){return `<h1 class="page">הדרך היחידה להגשים חלום היא להתעורר ולעבוד עליו!</h1>
@@ -387,9 +387,9 @@ function taskPick(){const ov=modal(`<h3>ג'וב קטן, תוצאה גדולה!</
     done(t.name,t.pts,t)})}
 function buy(id){const r=S.rewards.find(x=>x.id===id),p=PTS();if(!r)return;
   if(r.unit){qtyAsk(r,'יורד מהיתרה',q=>{const c=q*r.pts;if(c>p){alertBox(`חסרות לך ${fN(c-p)} נק'. יאללה, למשימות! 💪`,'🪙');return}
-    addLedger('reward',`${r.name} · ${fN(q)} ${r.unit==='דקה'?'דקות':r.unit==='יום'?'ימים':r.unit}`,-c,r.icon,'',{qty:q,rid:r.id,tag:r.tag||''});save();render();alertBox(`תתחדש! ${fN(c)} נק' ירדו מהכספת. תראה לאבא כדי לממש`,'🛒','מגניב')});return}
+    addLedger('reward',`${r.name} · ${fN(q)} ${r.unit==='דקה'?'דקות':r.unit==='יום'?'ימים':r.unit}`,-c,r.icon,'',{qty:q,rid:r.id,tag:r.tag||''});save();render();alertBox(`תתחדש! ${fN(c)} נק' ירדו מהכספת. זה שלך! 🎉`,'🛒','מגניב')});return}
   if(p<r.pts){alertBox(`חסרות לך ${fN(r.pts-p)} נק'. יאללה, למשימות! 💪`,'🪙');return}
-  ask(`לקנות "${r.name}" ב-${fN(r.pts)} נק'?`,()=>{addLedger('reward',r.name,-r.pts,r.icon,'',{rid:r.id});save();render();alertBox(`תתחדש! ${fN(r.pts)} נק' ירדו מהכספת. תראה לאבא כדי לממש`,'🛒','מגניב')},'כן, אני רוצה!')}
+  ask(`לקנות "${r.name}" ב-${fN(r.pts)} נק'?`,()=>{addLedger('reward',r.name,-r.pts,r.icon,'',{rid:r.id});save();render();alertBox(`תתחדש! ${fN(r.pts)} נק' ירדו מהכספת. זה שלך! 🎉`,'🛒','מגניב')},'כן, אני רוצה!')}
 function convertFlow(){const ov=modal(`<h3>המר נקודות לכסף ⚡</h3><div class="note">השער: ${fN(S.ratio)} נק' = ₪1 · יש לך ${fN(PTS())} נק'</div>
   <div class="fld"><label>כמה נקודות להמיר?</label><input id="cv" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>תקבל לקופה</small><div class="big" id="cvo" style="font-size:34px">₪0</div></div><button class="btn cy" data-sv>המר עכשיו</button>`);
   const i=ov.querySelector('#cv');i.addEventListener('input',()=>ov.querySelector('#cvo').textContent='₪'+fN(toCash(num(i.value))));setTimeout(()=>i.focus(),80);
