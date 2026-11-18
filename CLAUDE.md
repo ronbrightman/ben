@@ -13,8 +13,11 @@ Do not refactor the source files without Ron asking.
   where to start (exact URL), what to click, what to type/paste (exact values),
   what he should see if it worked, and what to send back. Never a one-line
   "go add X in settings".
-- Never give vendor UI paths (Netlify, name.com, GitHub) from memory: verify
-  against current docs first, and say a label may differ slightly if unsure.
+- Never give vendor UI paths (Netlify, name.com, GitHub) from memory OR from
+  docs: docs labels drifted from Ron's real screens (2026-11-18, Ron: "you're
+  imagining again"). Give click-by-click button names ONLY when read off a
+  screenshot of Ron's actual screen; otherwise ask for one step's screenshot,
+  then give the exact next click from it, one screen at a time.
 - Verify state at source (curl/git) before claiming anything is live or works;
   after deploy, prove it with a real check.
 - When you find a bug, fix it; still ask before money/irreversible actions.
