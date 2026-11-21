@@ -105,6 +105,7 @@ h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 .md.small{max-width:360px;border-color:var(--orange);box-shadow:0 0 0 4px #ffc84522}
 /* draw */
 .li.ev.past{opacity:.45}.li.ev.now{background:#6cabdd22;box-shadow:inset 3px 0 0 var(--lime)}
+.reader p{font-size:17px;line-height:1.75;margin:0 0 14px}.reader .ri{font-size:40px;text-align:center}.reader h3{margin-left:0;text-align:center}
 .pitch{position:relative;width:100%;aspect-ratio:4/3.4;border-radius:16px;overflow:hidden;margin:6px 0 4px;background:repeating-linear-gradient(180deg,#2f8b3c 0 28px,#287c34 28px 56px);touch-action:manipulation}
 .pitch .goal{position:absolute;top:7%;left:9%;width:82%;height:42%;border:5px solid #fff;border-bottom:0;border-radius:4px 4px 0 0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);box-shadow:0 6px 0 -3px #ffffff55}
 .pitch .net{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#ffffff30 0 1.5px,transparent 1.5px 11px),repeating-linear-gradient(-45deg,#ffffff30 0 1.5px,transparent 1.5px 11px),#0b2a14aa;pointer-events:none}
@@ -255,7 +256,7 @@ function ttLeft(){const ms=Math.max(0,ttTarget()-Date.now()),s=Math.floor(ms/100
 function tiktokInfo(){const d=tiktokDays(),l=ttLeft();return `${l.done?'הגיע הזמן! 🎉':`עוד ${fN(l.d)} ימים`} · טיקטוק מ-${fD(ttTarget().getTime()).split(' ·')[0]}${d?` · קנית ${fN(d)} ימי הקדמה`:''}`}
 function toMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const s=Math.max(0,Math.floor((m-n)/1000));return `${p2(Math.floor(s/3600))}:${p2(Math.floor(s%3600/60))}:${p2(s%60)}`}
 let lastDay=null;
-setInterval(()=>{document.querySelectorAll('.cdn').forEach(e=>e.textContent=toMidnight());const k=dayKey();if(lastDay&&k!==lastDay){allowance();if(route==='home'&&!document.querySelector('.ov'))render()}lastDay=k},1000);
+setInterval(()=>{document.querySelectorAll('.cdn').forEach(e=>e.textContent=toMidnight());if(document.querySelector('.rcd')){const l=readLeft();if(!l&&route==='tasks'&&!document.querySelector('.ov'))render();else document.querySelectorAll('.rcd').forEach(e=>e.textContent=fmtMS(l))}const k=dayKey();if(lastDay&&k!==lastDay){allowance();if(route==='home'&&!document.querySelector('.ov'))render()}lastDay=k},1000);
 setInterval(()=>{const e=document.getElementById('tt');if(!e)return;const l=ttLeft();e.innerHTML=l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`},1000);
 function qtyAsk(x,verb,cb){const ov=modal(`<h3>${x.icon} ${esc(x.name)}</h3><div class="note">${fN(x.pts)} נק'${perTxt(x)}</div><div class="fld"><label>כמה? (${esc(x.unit)})</label><input id="q" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>${verb}</small><div class="big" id="qo" style="font-size:34px">0 <span>נק'</span></div></div><button class="btn pri" data-sv>${verb==='נכנס לכספת'?'יאללה, תוסיף!':'קנה!'}</button>`);
   const i=ov.querySelector('#q');i.addEventListener('input',()=>ov.querySelector('#qo').innerHTML=fN(Math.floor(num(i.value))*x.pts)+' <span>נק\'</span>');setTimeout(()=>i.focus(),80);
@@ -278,6 +279,26 @@ function guard(msg){if(admin)return true;alertBox(msg,'😏','בסדר, בסדר
   if(al){const k=document.createElement('button');k.className='btn ghost';k.style.marginTop='8px';k.textContent='🔐 אבא? הכנס קוד';k.onclick=()=>{o.remove();pinGate(true)};al.appendChild(k)}return false}
 const safeUrl=u=>{u=String(u||'').trim();return /^https?:\/\/\S+$/i.test(u)?u:''};
 const safeImg=u=>{u=String(u||'').trim();return /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(u)?u:safeUrl(u)};
+/* ============ reading ============ */
+// קטע קריאה: נפתח שעה אחרי הקריאה הקודמת. בסיום (גלילה עד הסוף + חצי מזמן הקריאה המשוער) מקבלים פרס אקראי מרשימת ההגרלה — בלי קשר להגרלה היומית
+let READS=null;const readsGet=async()=>READS||(READS=await (await fetch('readings.json',{cache:'no-cache'})).json());
+const readLeft=()=>Math.max(0,num(S.readNext)-Date.now());
+const prizeRange=()=>{const v=S.surprises.map(s=>num(s.pts)).filter(x=>x>0);return v.length?(Math.min(...v)===Math.max(...v)?`${Math.min(...v)}`:`${Math.min(...v)}–${Math.max(...v)}`):''};
+const fmtMS=ms=>{const s=Math.ceil(ms/1000);return `${p2(Math.floor(s/60))}:${p2(s%60)}`};
+function readBtn(){const l=readLeft();return l?`<button class="btn" style="margin-top:10px;min-height:54px;opacity:.75" data-act="readlock">📖 קטע הקריאה הבא נפתח בעוד <b class="rcd" style="color:var(--cyan)">${fmtMS(l)}</b></button>`
+  :`<button class="btn cy" style="margin-top:10px;min-height:58px;font-size:17px" data-act="read">📖 קטע קריאה חדש · <span dir="ltr">+${prizeRange()}</span> נק'</button>`}
+async function readFlow(){if(readLeft()){alertBox(`קטע הקריאה הבא נפתח בעוד ${fmtMS(readLeft())} ⏳`,'📖');return}
+  let R;try{R=await readsGet()}catch(e){alertBox('לא הצלחתי לטעון את הקטע. בדוק אינטרנט ונסה שוב','⚠️');return}
+  const i=num(S.readIdx)%R.length,r=R[i],words=r.p.join(' ').split(/\s+/).length,mins=Math.max(1,Math.round(words/120)),minMs=mins*30000,t0=Date.now();
+  const ov=modal(`<div class="reader"><div class="ri">${r.icon||'📖'}</div><h3>${esc(r.title)}</h3><div class="note">⏱️ בערך ${mins} דקות קריאה · בסוף תקבל <span dir="ltr">+${prizeRange()}</span> נק'</div>${r.p.map(x=>`<p>${esc(x)}</p>`).join('')}
+    <button class="btn pri" data-sv disabled style="opacity:.45;margin-top:14px">✔️ סיימתי לקרוא</button><div class="note" id="rhint" style="text-align:center">גלול עד הסוף כדי לסיים</div></div>`);
+  const bt=ov.querySelector('[data-sv]'),hint=ov.querySelector('#rhint');let bottom=false;
+  const chk=()=>{bottom=bottom||ov.scrollTop+ov.clientHeight>=ov.scrollHeight-60;const left=minMs-(Date.now()-t0),ok=bottom&&left<=0;bt.disabled=!ok;bt.style.opacity=ok?1:.45;
+    hint.textContent=ok?'כל הכבוד! לחץ סיימתי 👆':!bottom?'גלול עד הסוף כדי לסיים':`רגע, אל תמהר 😉 עוד ${fmtMS(left)}`};
+  ov.addEventListener('scroll',chk,{passive:true});const iv=setInterval(()=>{if(!document.body.contains(ov)){clearInterval(iv);return}chk()},1000);chk();
+  bt.onclick=()=>{if(bt.disabled)return;clearInterval(iv);if(readLeft())return;const s=S.surprises.filter(x=>num(x.pts)>0);const pz=s.length?num(s[Math.random()*s.length|0].pts):1;
+    addLedger('reading',`קריאה: ${r.title}`,pz,'📖');S.readIdx=num(S.readIdx)+1;S.readNext=Date.now()+3600e3;save();ov.remove();render();alertBox(`קראת עד הסוף! +${fN(pz)} נק' נכנסו לכספת 📚`,'🏆','יאללה');boom()}}
+
 /* ============ schedule ============ */
 const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];let schTab='d',schDraft=[],schBad=[],schSkip=[];
 const toM=s=>{if(!s)return 0;const[h,m]=String(s).split(':').map(Number);return h*60+(m||0)},hm=m=>`${p2(Math.floor(m/60)%24)}:${p2(m%60)}`;
@@ -373,8 +394,8 @@ home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
   <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המרה נקודות ⇄ כסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
   <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'פנדל יומי – הגרלה!'}</button>
   <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile" data-go="sched"><span>📅</span>לו״ז${(n=>n?`<small style="font-size:11px;font-weight:500;color:var(--cyan)">${esc(((n.start?n.start+' ':'')+n.title).slice(0,18))}</small>`:'')(nextEv())}</button><button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
-tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
-  return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
+tasks(){const h=S.ledger.filter(x=>x.type==='task'||x.type==='reading').sort((a,b)=>b.ts-a.ts);
+  return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${readBtn()}${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
 shop(){const p=PTS();
   return `<h1 class="page">חנות האוהדים 👕</h1><div class="note" style="margin-top:-6px">יש לך <b style="color:var(--lime)">${fN(p)} נק'</b> לבזבז. בוחרים, הנקודות יורדות מיד, וזה שלך!</div>
   <button class="btn" style="margin-bottom:12px" data-act="dreamnew">🏆 רוצה משהו שאין בחנות? בקש מאבא</button>
@@ -549,6 +570,8 @@ document.addEventListener('click',e=>{
   case'adminbtn':admin?go('admin'):pinGate();break;
   case'lock':admin=false;route='home';render();notices();break;
   case'draw':drawFlow();break;
+  case'read':readFlow();break;
+  case'readlock':alertBox(`קטע הקריאה הבא נפתח בעוד ${fmtMS(readLeft())} ⏳ שעה אחרי הקריאה הקודמת`,'📖');break;
   case'schtab':schTab=b.dataset.k;render();break;
   case'schparse':{const L=parseSched($('#schtx').value),bad=L.filter(e=>e._noday);schSkip=L.filter(e=>e._skip);schDraft=L.filter(e=>!e._noday&&!e._skip).map((e,i)=>({...e,_k:'d'+i}));schBad=bad;schPv();break}
   case'drdel':{schDraft=schDraft.filter(e=>e._k!==id);schPv();break}
