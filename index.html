@@ -257,7 +257,7 @@ setInterval(()=>{const e=document.getElementById('tt');if(!e)return;const l=ttLe
 function qtyAsk(x,verb,cb){const ov=modal(`<h3>${x.icon} ${esc(x.name)}</h3><div class="note">${fN(x.pts)} נק'${perTxt(x)}</div><div class="fld"><label>כמה? (${esc(x.unit)})</label><input id="q" inputmode="numeric" placeholder="0"></div><div class="bal" style="padding:10px;margin-bottom:12px"><small>${verb}</small><div class="big" id="qo" style="font-size:34px">0 <span>נק'</span></div></div><button class="btn pri" data-sv>${verb==='נכנס לכספת'?'יאללה, תוסיף!':'קנה!'}</button>`);
   const i=ov.querySelector('#q');i.addEventListener('input',()=>ov.querySelector('#qo').innerHTML=fN(Math.floor(num(i.value))*x.pts)+' <span>נק\'</span>');setTimeout(()=>i.focus(),80);
   ov.querySelector('[data-sv]').onclick=()=>{const q=Math.floor(num(i.value));if(q<=0)return;ov.remove();cb(q)}}
-function dayKey(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`} // מתחדש בחצות לפי שעון המכשיר
+function dayKey(d){d=d||new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`} // מתחדש בחצות לפי שעון המכשיר
 function monthOf(list,off){const n=new Date(),m=new Date(n.getFullYear(),n.getMonth()+off,1);
   return {label:`${HM[m.getMonth()]} ${m.getFullYear()}`,items:list.filter(x=>{const d=new Date(x.ts);return d.getFullYear()===m.getFullYear()&&d.getMonth()===m.getMonth()}).sort((a,b)=>b.ts-a.ts)}}
 function addLedger(type,name,pts,icon,note,extra){S.ledger.push(Object.assign({id:uid(),ts:Date.now(),type,name,pts:num(pts),icon:icon||'⭐',note:note||''},extra||{}))}
@@ -339,7 +339,9 @@ admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
     body=`<div class="note">דברים שבן ביקש להוסיף לחנות. ✅ מאשר במחיר שהציע, ✏️ קובע מחיר אחר ומאשר, ❌ לא מאשר. אחרי אישור זה נכנס לחנות.</div><div class="list">${L.length?L.map(d=>`<div class="li"><div class="ic">${d.icon||'🚀'}</div><div class="t"><b>${esc(d.name)}</b><small>${fD(d.ts)}${d.notes?' · '+esc(d.notes):''}</small></div><span class="v">${fN(d.target)} נק'</span>${d.ok===false?`<div class="acts"><button data-act="dok" data-id="${d.id}">✅</button><button data-act="dprice" data-id="${d.id}">✏️</button><button data-act="dno" data-id="${d.id}">❌</button></div>`:`<span class="badge b-ok">מאושר</span>`}</div>`).join(''):'<div class="empty">אין בקשות חדשות</div>'}</div>`}
   if(adminTab==='tasks'||adminTab==='rewards'){const L=S[adminTab];
     body=`<button class="btn pri" data-act="anew">+ ${adminTab==='tasks'?'משימה':'פרס'} חדש${adminTab==='tasks'?'ה':''}</button><div class="list" style="margin-top:10px">${L.length?L.map(x=>`<div class="li"><div class="ic">${x.icon}</div><div class="t"><b>${esc(x.name)}</b><small>${esc(x.desc||'')}</small></div><span class="v ${adminTab==='tasks'?'plus':''}">${fN(x.pts)} נק'${perTxt(x)}</span><div class="acts"><button data-act="aedit" data-id="${x.id}">✏️</button><button data-act="adel" data-id="${x.id}">🗑️</button></div></div>`).join(''):'<div class="empty">הרשימה ריקה</div>'}</div>`}
-  if(adminTab==='surprises'){const F=Object.entries(S.fixedDraws||{}).sort();body=`<button class="btn pri" data-act="snew">+ הפתעה חדשה</button>
+  if(adminTab==='surprises'){const F=Object.entries(S.fixedDraws||{}).sort(),dd=S.draw&&S.draw.day===dayKey();body=`<div class="list" style="padding:12px;margin-bottom:12px"><div class="note" style="margin-top:0">${dd?`✅ בן כבר הגריל היום: <b>${esc(S.draw.text)}</b>`:'⏳ בן עוד לא הגריל היום'}</div>
+    <div class="row2" style="grid-auto-rows:auto"><button class="btn cy" style="min-height:0" data-act="drawtest">🧪 נסה את המשחק<br><small style="font-weight:500">בדיקה, בלי נקודות</small></button><button class="btn ${dd?'or':'ghost'}" style="min-height:0" data-act="drawundo" ${dd?'':'disabled style="opacity:.4;min-height:0"'}>↩️ בטל את ההגרלה של היום<br><small style="font-weight:500">מוריד את הנקודות ומאפשר שוב</small></button></div></div>
+    <button class="btn pri" data-act="snew">+ הפתעה חדשה</button>
     <h2>📅 הגרלה מכוונת לתאריך</h2><div class="note">ביום שתבחר ההגרלה תיתן בדיוק את מספר הנקודות שקבעת (היום מתחלף בחצות).</div>
     <div class="list" style="margin-bottom:10px">${F.length?F.map(([dt,v])=>`<div class="li"><div class="ic">📅</div><div class="t"><b>${dt.split('-').reverse().join('/')}</b></div><span class="v plus">+${fN(v)}</span><div class="acts"><button data-act="fxdel" data-id="${dt}">🗑️</button></div></div>`).join(''):'<div class="empty">אין</div>'}</div>
     <button class="btn" data-act="fxnew">+ הוסף תאריך</button><h2>🎁 רשימת ההגרלה הרגילה</h2><div class="note">אפשר לתת להפתעה נקודות (נכנסות מיד), או 0 להפתעה שאינה נקודות.</div><div class="list">${S.surprises.length?S.surprises.map(x=>`<div class="li"><div class="ic">🎁</div><div class="t"><b>${esc(x.text)}</b></div><span class="v plus">${x.pts?'+'+fN(x.pts):''}</span><div class="acts"><button data-act="sedit" data-id="${x.id}">✏️</button><button data-act="sdel" data-id="${x.id}">🗑️</button></div></div>`).join(''):'<div class="empty">אין הפתעות ברשימה</div>'}</div>`}
@@ -400,16 +402,16 @@ function drawFlow(){const today=dayKey();
 // הפרס נקבע ונשמר ברגע הבעיטה (לפי ההגרלות המוגדרות/המכוונות) — המשחק הוא רק הדרך לחשוף אותו
 function commitDraw(){const today=dayKey();if(S.draw&&S.draw.day===today)return S.draw;
   const fx=(S.fixedDraws||{})[today];const s=fx?{text:`+${fN(fx)} נקודות 🎉`,pts:fx}:S.surprises[Math.random()*S.surprises.length|0];S.draw={day:today,text:s.text,pts:num(s.pts),claimed:true};if(S.draw.pts)addLedger('surprise','הגרלה: '+s.text,s.pts,'⚽');save();return S.draw}
-function kickGame(){const ov=modal(`<h3>⚽ הבעיטה היומית</h3><div class="note">בחר סוג בעיטה:</div><div class="row2"><button class="btn pri" data-k="pen">🥅 פנדל<br><small style="font-weight:500">מול השוער</small></button><button class="btn cy" data-k="fk">🎯 בעיטה חופשית<br><small style="font-weight:500">מעל החומה</small></button></div>`,{center:true});
-  ov.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ov.remove();kickScene(b.dataset.k==='fk')})}
-function kickScene(fk){
+function kickGame(test){const ov=modal(`<h3>⚽ ${test?'בדיקת המשחק 🧪':'הבעיטה היומית'}</h3>${test?'<div class="note">מצב בדיקה – שום דבר לא נשמר</div>':''}<div class="note">בחר סוג בעיטה:</div><div class="row2"><button class="btn pri" data-k="pen">🥅 פנדל<br><small style="font-weight:500">מול השוער</small></button><button class="btn cy" data-k="fk">🎯 בעיטה חופשית<br><small style="font-weight:500">מעל החומה</small></button></div>`,{center:true});
+  ov.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ov.remove();kickScene(b.dataset.k==='fk',test)})}
+function kickScene(fk,test){
   const ov=modal(`<h3>${fk?'🎯 בעיטה חופשית':'🥅 פנדל'}</h3><div class="note" id="kmsg" style="text-align:center">לחץ איפה בשער לבעוט 👇</div>
   <div class="pitch" id="pitch"><div class="goal"><div class="net"></div>${[0,1,2,3,4,5].map(i=>`<button class="zone" data-z="${i}"></button>`).join('')}</div>
   <div class="keeper" id="kp"><i></i><b></b></div>${fk?'<div class="wall"><span></span><span></span><span></span></div>':''}
   <div class="ball ${fk?'fk':''}" id="kb">⚽</div></div>`,{center:true});
   let shot=false;
   ov.querySelectorAll('.zone').forEach(z=>z.onclick=()=>{if(shot)return;shot=true;
-    const d=commitDraw();render(); // נשמר מיד — סגירת החלון לא מבטלת
+    const d=test?(()=>{const fx=(S.fixedDraws||{})[dayKey()],s=fx?{text:`+${fN(fx)} נקודות 🎉`,pts:fx}:(S.surprises[Math.random()*S.surprises.length|0]||{text:'+1 נקודה',pts:1});return{text:s.text+' (בדיקה)',pts:0}})():commitDraw();if(!test)render(); // נשמר מיד — סגירת החלון לא מבטלת
     const P=ov.querySelector('#pitch').getBoundingClientRect(),Z=z.getBoundingClientRect(),B=ov.querySelector('#kb'),K=ov.querySelector('#kp'),br=B.getBoundingClientRect();
     const tx=Z.left+Z.width/2-(br.left+br.width/2),ty=Z.top+Z.height/2-(br.top+br.height/2);
     const kc=Math.random()*3|0,kr=Math.random()<.5?0:1,G=ov.querySelector('.goal').getBoundingClientRect(),kr2=K.getBoundingClientRect();
@@ -472,6 +474,9 @@ document.addEventListener('click',e=>{
   case'adminbtn':admin?go('admin'):pinGate();break;
   case'lock':admin=false;route='home';render();notices();break;
   case'draw':drawFlow();break;
+  case'drawtest':kickGame(true);break;
+  case'drawundo':{if(!(S.draw&&S.draw.day===dayKey()))break;const d=S.draw;ask(`לבטל את ההגרלה של היום (${d.text})? הנקודות יורדו ובן יוכל להגריל שוב`,()=>{
+    const i=S.ledger.map((x,k)=>[x,k]).filter(([x])=>x.type==='surprise'&&dayKey(new Date(x.ts))===d.day).pop();if(i)S.ledger.splice(i[1],1);S.draw=null;save();render();alertBox('ההגרלה של היום בוטלה ✔️ אפשר להגריל שוב','↩️','סגור')},'כן, בטל');break}
   case'taskpick':taskPick();break;
   case'buy':buy(id);break;
   case'convert':convertFlow();break;
