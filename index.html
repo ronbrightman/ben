@@ -104,6 +104,7 @@ h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 .alert p{font-size:19px;font-weight:700;line-height:1.4;margin-bottom:16px}
 .md.small{max-width:360px;border-color:var(--orange);box-shadow:0 0 0 4px #ffc84522}
 /* draw */
+.li.ev.past{opacity:.45}.li.ev.now{background:#6cabdd22;box-shadow:inset 3px 0 0 var(--lime)}
 .pitch{position:relative;width:100%;aspect-ratio:4/3.4;border-radius:16px;overflow:hidden;margin:6px 0 4px;background:repeating-linear-gradient(180deg,#2f8b3c 0 28px,#287c34 28px 56px);touch-action:manipulation}
 .pitch .goal{position:absolute;top:7%;left:9%;width:82%;height:42%;border:5px solid #fff;border-bottom:0;border-radius:4px 4px 0 0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);box-shadow:0 6px 0 -3px #ffffff55}
 .pitch .net{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#ffffff30 0 1.5px,transparent 1.5px 11px),repeating-linear-gradient(-45deg,#ffffff30 0 1.5px,transparent 1.5px 11px),#0b2a14aa;pointer-events:none}
@@ -173,7 +174,7 @@ function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function migrate(s){s=s&&s.tasks?s:defaults();s.ratio=1;s.fixedDraws=s.fixedDraws||{};
   if(!s.fixedSeed1){s.fixedDraws['2026-11-18']=7;s.fixedSeed1=true}if(!s.tiktok14)s.tiktok14='2028-03-24';
   if(!s.openSet){s.money.push({id:uid(),ts:Date.now(),name:'יתרת פתיחה – הכסף של בן אצל אבא',amt:2260,icon:'💰'});s.openSet=true}
-  ['ledger','money','requests','dreams','surprises','tasks','rewards'].forEach(k=>s[k]=s[k]||[]);
+  ['ledger','money','requests','dreams','surprises','tasks','rewards','events'].forEach(k=>s[k]=s[k]||[]);
   s.dreams.filter(d=>d.ok!==false).forEach(d=>{if(!s.rewards.some(r=>r.id===d.id))s.rewards.push({id:d.id,icon:d.icon&&d.icon!=='🚀'?d.icon:'🎁',name:d.name,desc:d.notes||'',pts:num(d.target),unit:'',calc:d.calc})});
   s.dreams=s.dreams.filter(d=>d.ok===false);
   if(s.allowAmt==null)s.allowAmt=100;if(!s.allowDone)s.allowDone='2026-11';return s}
@@ -277,6 +278,43 @@ function guard(msg){if(admin)return true;alertBox(msg,'😏','בסדר, בסדר
   if(al){const k=document.createElement('button');k.className='btn ghost';k.style.marginTop='8px';k.textContent='🔐 אבא? הכנס קוד';k.onclick=()=>{o.remove();pinGate(true)};al.appendChild(k)}return false}
 const safeUrl=u=>{u=String(u||'').trim();return /^https?:\/\/\S+$/i.test(u)?u:''};
 const safeImg=u=>{u=String(u||'').trim();return /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(u)?u:safeUrl(u)};
+/* ============ schedule ============ */
+const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];let schTab='d',schDraft=[],schBad=[];
+const toM=s=>{if(!s)return 0;const[h,m]=String(s).split(':').map(Number);return h*60+(m||0)},hm=m=>`${p2(Math.floor(m/60)%24)}:${p2(m%60)}`;
+const evT=e=>e.start?`<span dir="ltr">${e.start}${e.end?'–'+e.end:''}</span>`:'כל היום';
+const evSort=(a,b)=>((a.date||'')+(a.day??9)).localeCompare((b.date||'')+(b.day??9))||toM(a.start)-toM(b.start);
+function evsOn(d){const k=dayKey(d),w=d.getDay();return S.events.filter(e=>e.date?e.date===k:e.day===w).sort((a,b)=>toM(a.start)-toM(b.start))}
+function nextEv(){const n=new Date(),m=n.getHours()*60+n.getMinutes();return evsOn(n).find(e=>e.start&&(e.end?toM(e.end):toM(e.start)+45)>m)||evsOn(n).find(e=>!e.start)}
+function evList(L,adm){return L.length?`<div class="list">${L.map(e=>`<div class="li"><div class="ic">${e.icon}</div><div class="t"><b>${esc(e.title)}</b><small>${adm?(e.date?fD(new Date(e.date+'T12:00').getTime()).split(' ·')[0]:'כל '+DAYS[e.day])+' · ':''}${evT(e)}</small></div>${adm?`<div class="acts"><button data-act="evdel" data-id="${e.id}">🗑️</button></div>`:''}</div>`).join('')}</div>`:'<div class="list"><div class="empty">הלו״ז ריק</div></div>'}
+function evIcon(s){const R=[[/לישון|שינה|מיטה/,'😴'],[/שחי|בריכה/,'🏊'],[/אימון|כדורגל|כדורסל|טניס|ג'ודו|קראטה|ריצה|כושר/,'⚽'],[/משחק/,'🏟️'],[/מבחן|בוחן|מבדק/,'📝'],[/יום הולדת|יומולדת/,'🎂'],[/רופא|שיניים|אורתודנט|בדיק/,'🩺'],[/הסעה|אוטובוס/,'🚌'],[/הפסקה/,'🍎'],[/חוג|גיטרה|פסנתר|תופים|ציור/,'🎨'],[/מסיבה|אירוע/,'🎉'],[/טיול/,'🎒'],[/שיעור|מתמטיקה|חשבון|אנגלית|עברית|תנ"?ך|היסטוריה|מדעים|ביולוגיה|פיזיקה|כימיה|ספרות|גאוגרפיה|גיאוגרפיה|חנ"?ג|ספורט|אזרחות|מחשב|תכנות|ערבית|צרפתית|חינוך|בית ספר|ביה"?ס|כיתה/,'📚']];for(const[r,i]of R)if(r.test(s))return i;return '📌'}
+// מפענח טקסט חופשי: ימים (ראשון / א' / א'-ה' / שני ורביעי / כל יום), תאריכים (25/11, היום, מחר), שעות (8:00-8:45, 17-18, ב-17:00)
+function schPv(){const ok=schDraft,bad=schBad;$('#schpv').innerHTML=`<h2>👀 ככה הבנתי (${ok.length} אירועים)</h2>${evList(ok.map(e=>({...e,id:e._k})).sort(evSort),true).replace(/data-act="evdel"/g,'data-act="drdel"')}
+    ${bad.length?`<div class="note" style="color:var(--orange)">⚠️ לא הבנתי לאיזה יום שייכות ${bad.length} שורות: ${bad.map(e=>esc(e.title)).join(', ')}. הוסף יום או תאריך ונסה שוב.</div>`:''}
+    ${ok.length?`<div class="row2" style="grid-auto-rows:auto;margin-top:10px"><button class="btn pri" style="min-height:0" data-act="schsave" data-k="add">➕ הוסף ללו״ז</button><button class="btn or" style="min-height:0" data-act="schsave" data-k="rep">♻️ החלף את הקבועים</button></div>`:''}`}
+function parseSched(txt){const out=[],now=new Date();let ctx=null;
+  const DL=[['ראשון','א'],['שני','ב'],['שלישי','ג'],['רביעי','ד'],['חמישי','ה'],['שישי','ו'],['שבת','ש']];
+  const dayIdx=w=>{w=w.replace(/^ו?(ב|ל)?(יום|ימי)\s*/,'').replace(/^ו?ב?/,'').replace(/['׳"״]/g,'');for(let i=0;i<7;i++){if(w===DL[i][0]||w===DL[i][1])return i}return -1};
+  const dayRe=/(?:^|\s)(?:ו?ב?(?:יום|ימי)\s+)?(?:ו?ב?)(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]['׳])/g;
+  for(let raw of String(txt).split(/\n+/)){let s=raw.replace(/[–—]/g,'-').trim();if(!s)continue;
+    let days=null,date=null;
+    if(/כל יום|כל הימים|בכל יום/.test(s)){days=[0,1,2,3,4,5,6];s=s.replace(/ב?כל (?:יום|הימים)/,' ')}
+    const rng=s.match(/(?:ימים\s+)?(ראשון|שני|שלישי|רביעי|חמישי|שישי|[אבגדהו]['׳]?)\s*(?:-|עד)\s*(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]['׳]?)(?=\s|$|:)/);
+    if(!days&&rng){const a=dayIdx(rng[1]),b=dayIdx(rng[2]);if(a>=0&&b>=a){days=[];for(let i=a;i<=b;i++)days.push(i);s=s.replace(rng[0],' ')}}
+    const dm=s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/)||s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+    if(dm&&+dm[2]>=1&&+dm[2]<=12&&+dm[1]>=1&&+dm[1]<=31){const y=dm[3]?(dm[3].length===2?2000+ +dm[3]:+dm[3]):now.getFullYear();const d=new Date(y,+dm[2]-1,+dm[1]);if(!dm[3]&&d<new Date(now.getFullYear(),now.getMonth(),now.getDate()-1))d.setFullYear(y+1);date=dayKey(d);s=s.replace(dm[0],' ')}
+    if(/(^|\s)(היום)(\s|$)/.test(s)){date=dayKey(now);s=s.replace('היום',' ')}
+    if(/(^|\s)(מחר)(\s|$)/.test(s)){const d=new Date(now);d.setDate(d.getDate()+1);date=dayKey(d);s=s.replace('מחר',' ')}
+    if(!days&&!date){const f=[];let m;dayRe.lastIndex=0;while((m=dayRe.exec(s))){const i=dayIdx(m[1]);if(i>=0&&!f.includes(i))f.push(i)}
+      if(f.length){days=f;s=s.replace(/(?:^|\s)(?:ו?ב?(?:יום|ימי)\s+)?(?:ו?ב?)(?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]['׳])(?=[\s:,]|$)/g,' ')}}
+    const tm=s.match(/(?:ב-?|משעה\s*|בשעה\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*(?:-|עד)\s*(\d{1,2})(?:[:.](\d{2}))?/)||s.match(/(?:ב-?|בשעה\s*)?(\d{1,2})[:.](\d{2})/);
+    let start=null,end=null;if(tm){const h1=+tm[1];if(h1<=23){start=hm(h1*60+(+tm[2]||0));if(tm[3]!=null&&+tm[3]<=24)end=hm(+tm[3]*60+(+tm[4]||0));s=s.replace(tm[0],' ')}}
+    let title=s.replace(/^[\s:,\-–•*.]+|[\s:,\-–•*.]+$/g,'').replace(/\s{2,}/g,' ');
+    if(!start){if((days||date)&&!title){ctx={days,date};continue} if(!title)continue; start=''}
+    if(!days&&!date&&ctx){days=ctx.days;date=ctx.date}
+    if(!title)title='אירוע';
+    const base={start,end:start&&end&&toM(end)>toM(start)?end:'',title,icon:evIcon(title)};
+    if(date)out.push({...base,date});else if(days)days.forEach(d=>out.push({...base,day:d}));else out.push({...base,_noday:true})}
+  return out}
 function form(title,fields,onSave,btn='שמור'){
   const ov=modal(`<h3>${esc(title)}</h3>${fields.map((f,i)=>`<div class="fld"><label>${esc(f.label)}</label>${f.type==='area'?`<textarea rows="3" data-i="${i}">${esc(f.val)}</textarea>`:f.type==='select'?`<select data-i="${i}">${f.opts.map(o=>`<option value="${esc(o.v)}" ${o.v==f.val?'selected':''}>${esc(o.t)}</option>`).join('')}</select>`:`<input data-i="${i}" value="${esc(f.val??'')}" ${f.num?'inputmode="decimal"':''} placeholder="${esc(f.ph||'')}">`}</div>`).join('')}<button class="btn pri" data-sv>${btn}</button>`);
   fields.forEach((f,i)=>{if(!f.pick)return;const inp=ov.querySelector(`[data-i="${i}"]`),w=document.createElement('div');w.className='epick';
@@ -305,7 +343,7 @@ function boom(){
   const t0=performance.now();(function f(t){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});t-t0<3000?requestAnimationFrame(f):c.remove()})(t0)}
 
 /* ============ nav ============ */
-const NAV=[['home','🏟️','בית'],['tasks','⚽','משימות'],['shop','👕','חנות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
+const NAV=[['home','🏟️','בית'],['tasks','⚽','משימות'],['shop','👕','חנות'],['sched','📅','לו״ז'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
 function go(r){if(r==='admin'&&!admin){pinGate();return}route=r;render();scrollTo(0,0)}
 function renderNav(){$('#nav').innerHTML=NAV.map(([k,i,t])=>`<button class="${route===k?'on':''}" data-go="${k}"><span>${i}</span>${t}</button>`).join('');
   $('#chip').innerHTML=admin?`<button data-act="lock">🔓 מצב אבא פעיל · לחץ לנעילה</button>`:''}
@@ -325,7 +363,7 @@ home(){const p=PTS(),d=S.draw&&S.draw.day===dayKey();
   <div class="sub"><span class="pill">🏦 אצל אבא: ₪${fN(CASH())}</span><span class="pill">⚡ שווי הנקודות: ₪${fN(toCash(p))}</span></div></div>
   <div class="row2" style="margin-top:10px"><button class="btn cy" data-act="convert">⚡ המרה נקודות ⇄ כסף</button><button class="month" data-go="shop" style="flex-direction:column;justify-content:center;gap:2px;padding:6px"><small style="color:var(--mut);font-size:12px">📱 עד טיקטוק</small><span id="tt" style="font-size:14px">${(l=>l.done?'הגיע הזמן! 🎉':`<b>${fN(l.d)}</b> ימים · ${l.t}`)(ttLeft())}</span></button></div>
   <button class="drawbtn ${d?'used':''}" data-act="draw">⚽ ${d?`הגרלה הבאה בעוד <span class="cdn">${toMidnight()}</span>`:'פנדל יומי – הגרלה!'}</button>
-  <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile" data-act="dreamnew"><span>🏆</span>בקשה לחנות</button><button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
+  <div class="grid3">${[['tasks','⚽','משימות'],['shop','👕','חנות'],['history','📜','היסטוריה'],['bank','🏦','הקופה']].map(([k,i,t])=>`<button class="tile" data-go="${k}"><span>${i}</span>${t}</button>`).join('')}<button class="tile" data-go="sched"><span>📅</span>לו״ז${(n=>n?`<small style="font-size:11px;font-weight:500;color:var(--cyan)">${esc(((n.start?n.start+' ':'')+n.title).slice(0,18))}</small>`:'')(nextEv())}</button><button class="tile lock" data-act="adminbtn"><span>🔐</span>Admin Only</button></div>`},
 tasks(){const h=S.ledger.filter(x=>x.type==='task').sort((a,b)=>b.ts-a.ts);
   return `<h1 class="page">אימון יומי ⚽</h1><button class="btn pri" style="min-height:58px;font-size:18px" data-act="taskpick">⚽ משימה לבחירה</button>${pendingList(['task'])}<h2>✅ היסטוריית משימות</h2>${ledgerRows(h,'task')}`},
 shop(){const p=PTS();
@@ -336,6 +374,12 @@ shop(){const p=PTS();
   ${pendingList(['reward'])}`},
 history(){const all=S.ledger.concat(S.money.map(x=>Object.assign({},x,{isM:1})));const mb=monthBtn('history',all,'pts');
   return `<h1 class="page">היסטוריה 📜</h1><div class="note" style="margin-top:-6px">כל התנועות: נקודות וכסף בקופה</div><div class="row2"><button class="btn or" data-act="bonus">⭐ + בונוס</button>${mb.html}</div><h2>${mb.m.label}</h2>${ledgerRows(mb.m.items,'hist')}`},
+sched(){const today=new Date(),wd=today.getDay(),sun=new Date(today.getFullYear(),today.getMonth(),today.getDate()-wd);
+  const tl=evsOn(today),nowM=today.getHours()*60+today.getMinutes();
+  const rows=tl.map(e=>{const s=toM(e.start),en=!e.start?1440:e.end?toM(e.end):s+45,st=en<=nowM?'past':(s<=nowM?'now':'');return `<div class="li ev ${st}"><div class="ic">${e.icon}</div><div class="t"><b>${esc(e.title)}</b><small>${evT(e)}${e.date?' · חד-פעמי':''}</small></div>${st==='now'?'<span class="badge b-ok">עכשיו</span>':''}</div>`}).join('');
+  return `<h1 class="page">הלו״ז שלי 📅</h1><div class="tabs">${[['d','היום'],['w','השבוע']].map(([k,l])=>`<button class="${schTab===k?'on':''}" data-act="schtab" data-k="${k}">${l}</button>`).join('')}</div>
+  ${schTab==='d'?`<h2>${DAYS[wd]} · ${fD(today.getTime()).split(' ·')[0]}</h2>${tl.length?`<div class="list">${rows}</div>`:'<div class="list"><div class="empty">אין כלום היום. יום חופשי! 😎</div></div>'}`
+  :[0,1,2,3,4,5,6].map(i=>{const d=new Date(sun.getFullYear(),sun.getMonth(),sun.getDate()+i),L=evsOn(d);return `<h2 ${i===wd?'style="color:var(--lime)"':''}>${i===wd?'⭐ ':''}${DAYS[i]} · ${fD(d.getTime()).split(' ·')[0].slice(0,5)}</h2>${L.length?evList(L,false):'<div class="list"><div class="empty" style="padding:10px">—</div></div>'}`}).join('')}`},
 bank(){const mb=monthBtn('bank',S.money,'₪');
   return `<h1 class="page">הקופה אצל אבא 🏦</h1>
   <div class="bal" style="margin-bottom:12px"><small>הכסף שלי אצל אבא</small><div class="big">₪${fN(CASH())}</div><div class="sub"><span class="pill">שער: ${fN(S.ratio)} נק' = ₪1</span><span class="pill">⚡ ${fN(PTS())} נק' = ₪${fN(toCash(PTS()))}</span></div></div>
@@ -345,7 +389,7 @@ bank(){const mb=monthBtn('bank',S.money,'₪');
   ${mb.m.items.length?`<div class="list">${mb.m.items.map(x=>`<div class="li"><div class="ic">${x.icon||'💵'}</div><div class="t"><b>${esc(x.name)}</b><small>${fD(x.ts)}${x.by?' · נרשם ע"י '+x.by:''}${x.note?' · '+esc(x.note):''}</small></div><span class="v ${x.amt>=0?'plus':'minus'}">₪${fN(x.amt)}</span><div class="acts"><button data-act="medit" data-id="${x.id}">✏️</button><button data-act="mdel" data-id="${x.id}">🗑️</button></div></div>`).join('')}</div>`:`<div class="list"><div class="empty">אין תנועות בחודש הזה</div></div>`}`},
 admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
   const dp=S.dreams.filter(d=>d.ok===false).length;
-  const tabs=[['adjust','± יתרות'],['dreams',`בקשות${dp?' ('+dp+')':''}`],['tasks','משימות'],['rewards','חנות'],['surprises','הגרלה'],['settings','הגדרות']];
+  const tabs=[['adjust','± יתרות'],['dreams',`בקשות${dp?' ('+dp+')':''}`],['tasks','משימות'],['rewards','חנות'],['surprises','הגרלה'],['sched','לו״ז'],['settings','הגדרות']];
   let body='';
   if(adminTab==='approve'){const r=S.requests.slice().sort((a,b)=>(a.status==='pending'?0:1)-(b.status==='pending'?0:1)||b.ts-a.ts).slice(0,40);
     const K={task:'משימה',reward:'חנות',surprise:'הגרלה',convert:'המרה לכסף'};
@@ -363,6 +407,13 @@ admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
   if(adminTab==='adjust'){body=`<div class="list" style="padding:14px"><div class="note">הוספה או הורדה ידנית. כל שינוי נרשם בהיסטוריה (אפשר לערוך/למחוק משם).</div>
     <h2>⭐ נקודות: ${fN(PTS())} נק'</h2><div class="row2"><button class="btn pri" data-act="adjpts" data-sign="1">+ הוסף נקודות</button><button class="btn or" data-act="adjpts" data-sign="-1">− הורד נקודות</button></div>
     <h2>🏦 כסף אצל אבא: ₪${fN(CASH())}</h2><div class="row2"><button class="btn pri" data-act="adjcash" data-sign="1">+ הוסף כסף</button><button class="btn or" data-act="adjcash" data-sign="-1">− הורד כסף</button></div></div>`}
+  if(adminTab==='sched'){const W=S.events.filter(e=>e.day!=null).length,O=S.events.filter(e=>e.date).length;
+    body=`<div class="note">כתוב בטקסט חופשי – כל אירוע בשורה. אפשר לכתוב יום בשורה נפרדת ומתחתיו את השעות. דוגמאות:<br>
+    <span style="color:var(--cyan)">ראשון<br>8:00-8:45 מתמטיקה<br>8:50-9:35 אנגלית<br>שני ורביעי 17:00-18:30 אימון כדורגל<br>א'-ה' 7:30 הסעה לבית ספר<br>25/11 16:00 רופא שיניים<br>מחר 18:00 משחק נגד הפועל</span></div>
+    <div class="fld"><textarea id="schtx" rows="9" placeholder="הדבק כאן את המערכת / האימונים / האירועים..."></textarea></div>
+    <button class="btn pri" data-act="schparse">🪄 סדר לי את זה</button><div id="schpv"></div>
+    <h2>📅 מה כבר בלו״ז (${W} קבועים כל שבוע · ${O} חד-פעמיים)</h2>${evList(S.events.slice().sort(evSort),true)}
+    ${S.events.length?`<button class="btn ghost" style="margin-top:10px;color:var(--red)" data-act="schclear">🗑️ מחק את כל הלו״ז</button>`:''}`}
   if(adminTab==='settings'){body=`<div class="list" style="padding:14px">
     <div class="fld"><label>📱 תאריך יום ההולדת ה-14 של בן (לחישוב הטיקטוק)</label><input id="tt14" type="date" value="${esc(S.tiktok14||'')}"></div><div class="note" style="margin-top:-6px">המרה: 1 נק' = ₪1, בשני הכיוונים (נקודות ⇄ כסף).</div>
     <div class="fld"><label>קוד אבא (PIN)</label><input id="pin" inputmode="numeric" value="${esc(S.pin)}"></div>
@@ -489,6 +540,14 @@ document.addEventListener('click',e=>{
   case'adminbtn':admin?go('admin'):pinGate();break;
   case'lock':admin=false;route='home';render();notices();break;
   case'draw':drawFlow();break;
+  case'schtab':schTab=b.dataset.k;render();break;
+  case'schparse':{const L=parseSched($('#schtx').value),bad=L.filter(e=>e._noday);schDraft=L.filter(e=>!e._noday).map((e,i)=>({...e,_k:'d'+i}));schBad=bad;schPv();break}
+  case'drdel':{schDraft=schDraft.filter(e=>e._k!==id);schPv();break}
+
+  case'schsave':{if(!schDraft.length)break;const rep=b.dataset.k==='rep';const go=()=>{if(rep)S.events=S.events.filter(e=>e.date);schDraft.forEach(({_k,...e})=>S.events.push({id:uid(),...e}));schDraft=[];save();render();alertBox('הלו״ז עודכן ✔️','📅','סגור')};
+    rep?ask('להחליף את כל האירועים הקבועים (כל שבוע) במה שכתבת? אירועים חד-פעמיים יישארו',go,'כן, החלף'):go();break}
+  case'evdel':{const e=S.events.find(x=>x.id===id);if(e)ask(`למחוק את "${e.title}"?`,()=>{S.events=S.events.filter(x=>x.id!==id);save();render()});break}
+  case'schclear':ask('למחוק את כל הלו״ז?',()=>{S.events=[];save();render()},'כן, מחק הכל');break;
   case'drawtest':kickGame(true);break;
   case'drawundo':{if(!(S.draw&&S.draw.day===dayKey()))break;const d=S.draw;ask(`לבטל את ההגרלה של היום (${d.text})? הנקודות יורדו ובן יוכל להגריל שוב`,()=>{
     const i=S.ledger.map((x,k)=>[x,k]).filter(([x])=>x.type==='surprise'&&dayKey(new Date(x.ts))===d.day).pop();if(i)S.ledger.splice(i[1],1);S.draw=null;save();render();alertBox('ההגרלה של היום בוטלה ✔️ אפשר להגריל שוב','↩️','סגור')},'כן, בטל');break}
