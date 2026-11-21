@@ -279,40 +279,46 @@ function guard(msg){if(admin)return true;alertBox(msg,'😏','בסדר, בסדר
 const safeUrl=u=>{u=String(u||'').trim();return /^https?:\/\/\S+$/i.test(u)?u:''};
 const safeImg=u=>{u=String(u||'').trim();return /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(u)?u:safeUrl(u)};
 /* ============ schedule ============ */
-const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];let schTab='d',schDraft=[],schBad=[];
+const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];let schTab='d',schDraft=[],schBad=[],schSkip=[];
 const toM=s=>{if(!s)return 0;const[h,m]=String(s).split(':').map(Number);return h*60+(m||0)},hm=m=>`${p2(Math.floor(m/60)%24)}:${p2(m%60)}`;
 const evT=e=>e.start?`<span dir="ltr">${e.start}${e.end?'–'+e.end:''}</span>`:'כל היום';
 const evSort=(a,b)=>((a.date||'')+(a.day??9)).localeCompare((b.date||'')+(b.day??9))||toM(a.start)-toM(b.start);
 function evsOn(d){const k=dayKey(d),w=d.getDay();return S.events.filter(e=>e.date?e.date===k:e.day===w).sort((a,b)=>toM(a.start)-toM(b.start))}
 function nextEv(){const n=new Date(),m=n.getHours()*60+n.getMinutes();return evsOn(n).find(e=>e.start&&(e.end?toM(e.end):toM(e.start)+45)>m)||evsOn(n).find(e=>!e.start)}
 function evList(L,adm){return L.length?`<div class="list">${L.map(e=>`<div class="li"><div class="ic">${e.icon}</div><div class="t"><b>${esc(e.title)}</b><small>${adm?(e.date?fD(new Date(e.date+'T12:00').getTime()).split(' ·')[0]:'כל '+DAYS[e.day])+' · ':''}${evT(e)}</small></div>${adm?`<div class="acts"><button data-act="evdel" data-id="${e.id}">🗑️</button></div>`:''}</div>`).join('')}</div>`:'<div class="list"><div class="empty">הלו״ז ריק</div></div>'}
-function evIcon(s){const R=[[/לישון|שינה|מיטה/,'😴'],[/שחי|בריכה/,'🏊'],[/אימון|כדורגל|כדורסל|טניס|ג'ודו|קראטה|ריצה|כושר/,'⚽'],[/משחק/,'🏟️'],[/מבחן|בוחן|מבדק/,'📝'],[/יום הולדת|יומולדת/,'🎂'],[/רופא|שיניים|אורתודנט|בדיק/,'🩺'],[/הסעה|אוטובוס/,'🚌'],[/הפסקה/,'🍎'],[/חוג|גיטרה|פסנתר|תופים|ציור/,'🎨'],[/מסיבה|אירוע/,'🎉'],[/טיול/,'🎒'],[/שיעור|מתמטיקה|חשבון|אנגלית|עברית|תנ"?ך|היסטוריה|מדעים|ביולוגיה|פיזיקה|כימיה|ספרות|גאוגרפיה|גיאוגרפיה|חנ"?ג|ספורט|אזרחות|מחשב|תכנות|ערבית|צרפתית|חינוך|בית ספר|ביה"?ס|כיתה/,'📚']];for(const[r,i]of R)if(r.test(s))return i;return '📌'}
-// מפענח טקסט חופשי: ימים (ראשון / א' / א'-ה' / שני ורביעי / כל יום), תאריכים (25/11, היום, מחר), שעות (8:00-8:45, 17-18, ב-17:00)
-function schPv(){const ok=schDraft,bad=schBad;$('#schpv').innerHTML=`<h2>👀 ככה הבנתי (${ok.length} אירועים)</h2>${evList(ok.map(e=>({...e,id:e._k})).sort(evSort),true).replace(/data-act="evdel"/g,'data-act="drdel"')}
-    ${bad.length?`<div class="note" style="color:var(--orange)">⚠️ לא הבנתי לאיזה יום שייכות ${bad.length} שורות: ${bad.map(e=>esc(e.title)).join(', ')}. הוסף יום או תאריך ונסה שוב.</div>`:''}
-    ${ok.length?`<div class="row2" style="grid-auto-rows:auto;margin-top:10px"><button class="btn pri" style="min-height:0" data-act="schsave" data-k="add">➕ הוסף ללו״ז</button><button class="btn or" style="min-height:0" data-act="schsave" data-k="rep">♻️ החלף את הקבועים</button></div>`:''}`}
-function parseSched(txt){const out=[],now=new Date();let ctx=null;
-  const DL=[['ראשון','א'],['שני','ב'],['שלישי','ג'],['רביעי','ד'],['חמישי','ה'],['שישי','ו'],['שבת','ש']];
-  const dayIdx=w=>{w=w.replace(/^ו?(ב|ל)?(יום|ימי)\s*/,'').replace(/^ו?ב?/,'').replace(/['׳"״]/g,'');for(let i=0;i<7;i++){if(w===DL[i][0]||w===DL[i][1])return i}return -1};
-  const dayRe=/(?:^|\s)(?:ו?ב?(?:יום|ימי)\s+)?(?:ו?ב?)(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]['׳])/g;
-  for(let raw of String(txt).split(/\n+/)){let s=raw.replace(/[–—]/g,'-').trim();if(!s)continue;
-    let days=null,date=null;
-    if(/כל יום|כל הימים|בכל יום/.test(s)){days=[0,1,2,3,4,5,6];s=s.replace(/ב?כל (?:יום|הימים)/,' ')}
-    const rng=s.match(/(?:ימים\s+)?(ראשון|שני|שלישי|רביעי|חמישי|שישי|[אבגדהו]['׳]?)\s*(?:-|עד)\s*(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]['׳]?)(?=\s|$|:)/);
-    if(!days&&rng){const a=dayIdx(rng[1]),b=dayIdx(rng[2]);if(a>=0&&b>=a){days=[];for(let i=a;i<=b;i++)days.push(i);s=s.replace(rng[0],' ')}}
-    const dm=s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/)||s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
-    if(dm&&+dm[2]>=1&&+dm[2]<=12&&+dm[1]>=1&&+dm[1]<=31){const y=dm[3]?(dm[3].length===2?2000+ +dm[3]:+dm[3]):now.getFullYear();const d=new Date(y,+dm[2]-1,+dm[1]);if(!dm[3]&&d<new Date(now.getFullYear(),now.getMonth(),now.getDate()-1))d.setFullYear(y+1);date=dayKey(d);s=s.replace(dm[0],' ')}
-    if(/(^|\s)(היום)(\s|$)/.test(s)){date=dayKey(now);s=s.replace('היום',' ')}
-    if(/(^|\s)(מחר)(\s|$)/.test(s)){const d=new Date(now);d.setDate(d.getDate()+1);date=dayKey(d);s=s.replace('מחר',' ')}
-    if(!days&&!date){const f=[];let m;dayRe.lastIndex=0;while((m=dayRe.exec(s))){const i=dayIdx(m[1]);if(i>=0&&!f.includes(i))f.push(i)}
-      if(f.length){days=f;s=s.replace(/(?:^|\s)(?:ו?ב?(?:יום|ימי)\s+)?(?:ו?ב?)(?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]['׳])(?=[\s:,]|$)/g,' ')}}
-    const tm=s.match(/(?:ב-?|משעה\s*|בשעה\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*(?:-|עד)\s*(\d{1,2})(?:[:.](\d{2}))?/)||s.match(/(?:ב-?|בשעה\s*)?(\d{1,2})[:.](\d{2})/);
-    let start=null,end=null;if(tm){const h1=+tm[1];if(h1<=23){start=hm(h1*60+(+tm[2]||0));if(tm[3]!=null&&+tm[3]<=24)end=hm(+tm[3]*60+(+tm[4]||0));s=s.replace(tm[0],' ')}}
-    let title=s.replace(/^[\s:,\-–•*.]+|[\s:,\-–•*.]+$/g,'').replace(/\s{2,}/g,' ');
-    if(!start){if((days||date)&&!title){ctx={days,date};continue} if(!title)continue; start=''}
-    if(!days&&!date&&ctx){days=ctx.days;date=ctx.date}
+function evIcon(s){const R=[[/לישון|שינה|מיטה/,'😴'],[/שחי|בריכה/,'🏊'],[/משחק/,'🏟️'],[/אימון|מכבי|הפועל|כדורגל|קט־?רגל|כדורסל|טניס|ג'ודו|קראטה|ריצה|כושר/,'⚽'],[/משחק/,'🏟️'],[/מבחן|בוחן|מבדק/,'📝'],[/יום הולדת|יומולדת/,'🎂'],[/רופא|שיניים|אורתודנט|בדיק/,'🩺'],[/הסעה|אוטובוס/,'🚌'],[/הפסקה/,'🍎'],[/חוג|גיטרה|פסנתר|תופים|ציור/,'🎨'],[/מסיבה|אירוע/,'🎉'],[/טיול/,'🎒'],[/שיעור|מתמטיקה|חשבון|אנגלית|עברית|תנ"?ך|היסטוריה|מדעים|ביולוגיה|פיזיקה|כימיה|ספרות|גאוגרפיה|גיאוגרפיה|חנ"?ג|ספורט|אזרחות|מחשב|תכנות|ערבית|צרפתית|חינוך|בית ספר|ביה"?ס|כיתה/,'📚']];for(const[r,i]of R)if(r.test(s))return i;return '📌'}
+// מפענח טקסט חופשי ללו״ז. מבין: כותרת קבוצה ("מכבי:"), כותרת יום ("ראשון" / "יום שני:"), ימים בשורה (שני ורביעי / יום א / א'-ה' / כל יום),
+// תאריכים (25/11, 23.11, היום, מחר), שעות (8:00-8:45, 19:30–21:00, 16-17, בשעה 15.30). שורות בלי שעה ובלי תאריך (ברכות, הערות) לא נכנסות.
+function parseSched(txt){const out=[],now=new Date();let dctx=null,pre='';
+  const FULL=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'],LET='אבגדהוש';
+  const dayTok=new RegExp(`(?:^|[\\s,(])(?:ו?ב?ה?(?:יום|ימי|ימים)\\s+)?(?:ו?ב?)(${FULL.join('|')}|[${LET}]['׳](?=[\\s,:\\-|·]|$))|(?:^|[\\s,(])(?:ו?ב?(?:יום|ימי)\\s+)([${LET}])(?=[\\s,:\\-|·]|$)`,'g');
+  const di=w=>{w=w.replace(/['׳]/g,'');const i=FULL.indexOf(w);return i>=0?i:LET.indexOf(w)};
+  const dt=(d,m,y)=>{d=+d;m=+m;if(m<1||m>12||d<1||d>31)return null;y=y?(String(y).length===2?2000+ +y:+y):now.getFullYear();const x=new Date(y,m-1,d);if(!arguments[2]&&x<new Date(now.getFullYear(),now.getMonth(),now.getDate()-7))x.setFullYear(y+1);return dayKey(x)};
+  for(const raw of String(txt).split('\n')){let s=raw.replace(/[–—]/g,'-').replace(/\|/g,' · ').trim();if(!s)continue;
+    let date=null,days=null,start=null,end=null,m;
+    // תאריך
+    if((m=s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/))&&(date=dt(m[1],m[2],m[3])))s=s.replace(m[0],' ');
+    else if((m=s.match(/(?<![\d:])(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?(?![\d:])/))&&!/בשעה\s*$/.test(s.slice(0,m.index))&&(date=dt(m[1],m[2],m[3])))s=s.replace(m[0],' ');
+    if(!date&&/(^|\s)היום(\s|$|[,.])/.test(s)){date=dayKey(now);s=s.replace('היום',' ')}
+    if(!date&&/(^|\s)מחר(\s|$|[,.])/.test(s)){const x=new Date(now);x.setDate(x.getDate()+1);date=dayKey(x);s=s.replace('מחר',' ')}
+    // שעות
+    if((m=s.match(/(\d{1,2})[:.](\d{2})\s*(?:-|עד)\s*(\d{1,2})[:.](\d{2})/))&&+m[1]<24&&+m[3]<=24){start=hm(+m[1]*60+ +m[2]);end=hm(+m[3]*60+ +m[4]);s=s.replace(m[0],' ')}
+    else if((m=s.match(/(\d{1,2}):(\d{2})/)||s.match(/בשעה\s*(\d{1,2})\.(\d{2})/))&&+m[1]<24){start=hm(+m[1]*60+ +m[2]);s=s.replace(m[0],' ')}
+    else if((m=s.match(/(?:^|\s)(?:בין\s*)?(\d{1,2})\s*(?:-|עד)\s*(\d{1,2})(?=\s|$)/))&&+m[1]<24&&+m[2]<=24&&+m[2]>+m[1]&&!/ב?(ינואר|פברואר|מרץ|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר)/.test(s)){start=hm(+m[1]*60);end=hm(+m[2]*60);s=s.replace(m[0],' ')}
+    else if((m=s.match(/(?:בשעה|ב-)\s*(\d{1,2})(?=\s|$)/))&&+m[1]<24){start=hm(+m[1]*60);s=s.replace(m[0],' ')}
+    // ימים
+    if(/(?:ב)?כל (?:יום|הימים)/.test(s)){days=[0,1,2,3,4,5,6];s=s.replace(/(?:ב)?כל (?:יום|הימים)/,' ')}
+    if(!days&&(m=s.match(new RegExp(`(?:(?:ימים|יום|ימי)\\s+)?(${FULL.join('|')}|[${LET}]['׳]?)\\s*(?:-|עד)\\s*(${FULL.join('|')}|[${LET}]['׳]?)(?=[\\s,:·]|$)`)))){const a=di(m[1]),b=di(m[2]);if(a>=0&&b>a){days=[];for(let i=a;i<=b;i++)days.push(i);s=s.replace(m[0],' ')}}
+    if(!days){const f=[];dayTok.lastIndex=0;while((m=dayTok.exec(s))){const i=di(m[1]||m[2]);if(i>=0&&!f.includes(i))f.push(i)}if(f.length){days=f;s=s.replace(dayTok,' ')}}
+    let title=s.split('·').map(x=>x.replace(/^[\s:,\-•*.]+|[\s:,\-•*.]+$/g,'').replace(/\s{2,}/g,' ')).filter(Boolean).join(' · ');
+    if(!start&&!date){
+      if(days&&!title){dctx=days;continue}                       // כותרת יום
+      if(!days&&/:\s*$/.test(raw.trim())&&title){pre=title;dctx=null;continue} // כותרת קבוצה
+      out.push({_skip:true,title:raw.trim()});continue}          // ברכה/הערה
+    if(!days&&!date&&dctx)days=dctx;
+    if(pre&&!title.includes(pre))title=pre+(title?' · '+title:'');
     if(!title)title='אירוע';
-    const base={start,end:start&&end&&toM(end)>toM(start)?end:'',title,icon:evIcon(title)};
+    const base={start:start||'',end:start&&end&&toM(end)>toM(start)?end:'',title,icon:evIcon(title)};
     if(date)out.push({...base,date});else if(days)days.forEach(d=>out.push({...base,day:d}));else out.push({...base,_noday:true})}
   return out}
 function form(title,fields,onSave,btn='שמור'){
@@ -541,7 +547,7 @@ document.addEventListener('click',e=>{
   case'lock':admin=false;route='home';render();notices();break;
   case'draw':drawFlow();break;
   case'schtab':schTab=b.dataset.k;render();break;
-  case'schparse':{const L=parseSched($('#schtx').value),bad=L.filter(e=>e._noday);schDraft=L.filter(e=>!e._noday).map((e,i)=>({...e,_k:'d'+i}));schBad=bad;schPv();break}
+  case'schparse':{const L=parseSched($('#schtx').value),bad=L.filter(e=>e._noday);schSkip=L.filter(e=>e._skip);schDraft=L.filter(e=>!e._noday&&!e._skip).map((e,i)=>({...e,_k:'d'+i}));schBad=bad;schPv();break}
   case'drdel':{schDraft=schDraft.filter(e=>e._k!==id);schPv();break}
 
   case'schsave':{if(!schDraft.length)break;const rep=b.dataset.k==='rep';const go=()=>{if(rep)S.events=S.events.filter(e=>e.date);schDraft.forEach(({_k,...e})=>S.events.push({id:uid(),...e}));schDraft=[];save();render();alertBox('הלו״ז עודכן ✔️','📅','סגור')};
