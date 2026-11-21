@@ -299,7 +299,7 @@ async function readFlow(){if(readLeft()){alertBox(`רגע של עניין הבא
     addLedger('reading',`רגע של עניין: ${r.title}`,pz,'💡');S.readIdx=num(S.readIdx)+1;S.readNext=Date.now()+3600e3;save();ov.remove();render();alertBox(`קראת עד הסוף! +${fN(pz)} נק' נכנסו לכספת 📚`,'🏆','יאללה');boom()}}
 
 /* ============ schedule ============ */
-const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];let schTab='d',schDraft=[],schBad=[],schSkip=[];
+const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];let schOff=0,schTab='d',schDraft=[],schBad=[],schSkip=[];
 const toM=s=>{if(!s)return 0;const[h,m]=String(s).split(':').map(Number);return h*60+(m||0)},hm=m=>`${p2(Math.floor(m/60)%24)}:${p2(m%60)}`;
 const evT=e=>e.start?`<span dir="ltr">${e.start}${e.end?'–'+e.end:''}</span>`:'כל היום';
 const evSort=(a,b)=>((a.date||'')+(a.day??9)).localeCompare((b.date||'')+(b.day??9))||toM(a.start)-toM(b.start);
@@ -406,9 +406,10 @@ history(){const all=S.ledger.concat(S.money.map(x=>Object.assign({},x,{isM:1})))
 sched(){const today=new Date(),wd=today.getDay();
   const tl=evsOn(today),nowM=today.getHours()*60+today.getMinutes();
   const rows=tl.map(e=>{const s=toM(e.start),en=!e.start?1440:e.end?toM(e.end):s+45,st=en<=nowM?'past':(s<=nowM?'now':'');return `<div class="li ev ${st}"><div class="ic">${e.icon}</div><div class="t"><b>${esc(e.title)}</b><small>${evT(e)}${e.date?' · חד-פעמי':''}</small></div>${st==='now'?'<span class="badge b-ok">עכשיו</span>':''}<div class="acts"><button data-act="evdel" data-id="${e.id}">🗑️</button></div></div>`}).join('');
-  return `<h1 class="page">הלו״ז שלי 📅</h1><button class="btn cy" style="margin-bottom:10px" data-act="evadd">➕ הוסף ללו״ז</button><div class="tabs">${[['d','היום'],['w','7 ימים קדימה']].map(([k,l])=>`<button class="${schTab===k?'on':''}" data-act="schtab" data-k="${k}">${l}</button>`).join('')}</div>
+  return `<h1 class="page">הלו״ז שלי 📅</h1><button class="btn cy" style="margin-bottom:10px" data-act="evadd">➕ הוסף ללו״ז</button><div class="tabs">${[['d','היום'],['w','לפי שבועות']].map(([k,l])=>`<button class="${schTab===k?'on':''}" data-act="schtab" data-k="${k}">${l}</button>`).join('')}</div>
   ${schTab==='d'?`<h2>${DAYS[wd]} · ${fD(today.getTime()).split(' ·')[0]}</h2>${tl.length?`<div class="list">${rows}</div>`:'<div class="list"><div class="empty">אין כלום היום. יום חופשי! 😎</div></div>'}`
-  :[0,1,2,3,4,5,6].map(i=>{const d=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i),L=evsOn(d);return `<h2 ${i===0?'style="color:var(--lime)"':''}>${i===0?'⭐ היום · ':i===1?'מחר · ':''}${DAYS[d.getDay()]} · ${fD(d.getTime()).split(' ·')[0].slice(0,5)}</h2>${L.length?evList(L,false):'<div class="list"><div class="empty" style="padding:10px">—</div></div>'}`}).join('')}`},
+  :(()=>{const s0=schOff*7,a=new Date(today.getFullYear(),today.getMonth(),today.getDate()+s0),z=new Date(a.getFullYear(),a.getMonth(),a.getDate()+6),f=x=>fD(x.getTime()).split(' ·')[0].slice(0,5);
+    return `<div class="month" style="margin-bottom:6px"><button class="arr" data-act="schoff" data-k="-1" ${schOff<=0?'style="opacity:.25"':''} aria-label="קודם">›</button><div class="ml"><b>${schOff===0?'7 הימים הקרובים':schOff===1?'השבוע שאחרי':`בעוד ${schOff} שבועות`}</b><small>${f(a)} – ${f(z)}</small></div><button class="arr" data-act="schoff" data-k="1" aria-label="הבא">‹</button></div>`})()+[0,1,2,3,4,5,6].map(i=>{i+=schOff*7;const d=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i),L=evsOn(d);return `<h2 ${i===0?'style="color:var(--lime)"':''}>${i===0?'⭐ היום · ':i===1?'מחר · ':''}${DAYS[d.getDay()]} · ${fD(d.getTime()).split(' ·')[0].slice(0,5)}${L.length?'':' <small style="opacity:.6;font-weight:400">· פנוי</small>'}</h2>${L.length?evList(L,false):''}`}).join('')}`},
 bank(){const mb=monthBtn('bank',S.money,'₪');
   return `<h1 class="page">הקופה אצל אבא 🏦</h1>
   <div class="bal" style="margin-bottom:12px"><small>הכסף שלי אצל אבא</small><div class="big">₪${fN(CASH())}</div><div class="sub"><span class="pill">שער: ${fN(S.ratio)} נק' = ₪1</span><span class="pill">⚡ ${fN(PTS())} נק' = ₪${fN(toCash(PTS()))}</span></div></div>
@@ -571,7 +572,8 @@ document.addEventListener('click',e=>{
   case'draw':drawFlow();break;
   case'read':document.querySelectorAll('.ov').forEach(o=>o.remove());readFlow();break;
   case'readlock':alertBox(`רגע של עניין הבא נפתח בעוד ${fmtMS(readLeft())} ⏳ שעה אחרי הקריאה הקודמת`,'💡');break;
-  case'schtab':schTab=b.dataset.k;render();break;
+  case'schtab':schTab=b.dataset.k;schOff=0;render();break;
+  case'schoff':schOff=Math.max(0,Math.min(52,schOff+num(b.dataset.k)));render();scrollTo(0,0);break;
   case'evadd':form('➕ פריט חדש בלו״ז',[{label:'מה?',val:'',req:true,ph:'למשל: יום הולדת לנועם'},{label:'תאריך',type:'date',val:dayKey(),req:true},{label:'משעה',type:'time',val:''},{label:'עד שעה (לא חובה)',type:'time',val:''},{label:'חוזר?',type:'select',val:'once',opts:[{v:'once',t:'פעם אחת – רק בתאריך הזה'},{v:'week',t:'כל שבוע – באותו יום'}]}],v=>{
     const d=new Date(v[1]+'T12:00');if(isNaN(d)){alertBox('התאריך לא תקין','📅');return false}const st=v[2]||'',en=st&&v[3]&&toM(v[3])>toM(st)?v[3]:'';
     const e={id:uid(),title:v[0],start:st,end:en,icon:evIcon(v[0]),by:admin?'אבא':'בן'};if(v[4]==='week')e.day=d.getDay();else e.date=dayKey(d);S.events.push(e)},'הוסף');break;
