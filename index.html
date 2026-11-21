@@ -225,6 +225,10 @@ async function boot(){
   if(!code){askCode();return}
   render();if(dirty)await push();else await pull(true);allowance();notices();
   setInterval(()=>{if(!document.hidden)pull()},15000);
+  // עדכון אוטומטי: אם עלתה גרסה חדשה של האתר בזמן שהאפליקציה פתוחה ברקע — טוענים אותה מחדש (רק כשאין חלון פתוח ואין שינוי שלא נשמר)
+  const etag=async()=>{try{const r=await fetch(location.pathname,{method:'HEAD',cache:'no-store'});return r.headers.get('etag')}catch(e){return null}};
+  let build=await etag();const chk=async()=>{const e=await etag();if(build&&e&&e!==build&&!dirty&&!pushing&&!document.querySelector('.ov'))location.reload();else if(!build)build=e};
+  setInterval(()=>{if(!document.hidden)chk()},60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){dirty?push():pull()}});
   addEventListener('online',()=>{dirty?push():pull()})}
 let admin=false,route='home',adminTab='tasks',moff={history:0,bank:0};
