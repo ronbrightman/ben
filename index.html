@@ -106,6 +106,7 @@ h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 /* draw */
 .li.ev.past{opacity:.45}.li.ev.now{background:#6cabdd22;box-shadow:inset 3px 0 0 var(--lime)}
 .reader p{font-size:17px;line-height:1.75;margin:0 0 14px}.reader .ri{font-size:40px;text-align:center}.reader h3{margin-left:0;text-align:center}
+.ghero{margin-bottom:6px}.gvs{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin:8px 0}.gt{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px}.gt img{width:52px;height:52px;object-fit:contain}.gmid{text-align:center}
 .pitch{position:relative;width:100%;aspect-ratio:4/3.4;border-radius:16px;overflow:hidden;margin:6px 0 4px;background:repeating-linear-gradient(180deg,#2f8b3c 0 28px,#287c34 28px 56px);touch-action:manipulation}
 .pitch .goal{position:absolute;top:7%;left:9%;width:82%;height:42%;border:5px solid #fff;border-bottom:0;border-radius:4px 4px 0 0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);box-shadow:0 6px 0 -3px #ffffff55}
 .pitch .net{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#ffffff30 0 1.5px,transparent 1.5px 11px),repeating-linear-gradient(-45deg,#ffffff30 0 1.5px,transparent 1.5px 11px),#0b2a14aa;pointer-events:none}
@@ -298,6 +299,20 @@ async function readFlow(){if(readLeft()){alertBox(`רגע של עניין הבא
   bt.onclick=()=>{if(bt.disabled)return;clearInterval(iv);if(readLeft())return;const s=S.surprises.filter(x=>num(x.pts)>0);const pz=s.length?num(s[Math.random()*s.length|0].pts):1;
     addLedger('reading',`רגע של עניין: ${r.title}`,pz,'💡');S.readIdx=num(S.readIdx)+1;S.readNext=Date.now()+3600e3;save();ov.remove();render();alertBox(`קראת עד הסוף! +${fN(pz)} נק' נכנסו לכספת 📚`,'🏆','יאללה');boom()}}
 
+/* ============ man city games ============ */
+let CITY=null,CITYERR=false,cityBusy=false;
+async function cityLoad(){if(cityBusy)return;cityBusy=true;try{const r=await fetch('/api/city');if(!r.ok)throw 0;const j=await r.json();CITY={t:Date.now(),games:j.games||[]};CITYERR=false}catch(e){CITYERR=!CITY}cityBusy=false;if(route==='city'&&!document.querySelector('.ov'))render()}
+const TEAMHE={'Man City':'מנצ\'סטר סיטי','Arsenal':'ארסנל','Aston Villa':'אסטון וילה','Bournemouth':'בורנמות\'','Brentford':'ברנטפורד','Brighton':'ברייטון','Burnley':'ברנלי','Chelsea':'צ\'לסי','C Palace':'קריסטל פאלאס','Everton':'אברטון','Fulham':'פולהאם','Ipswich':'איפסוויץ\'','Leeds':'לידס','Leicester':'לסטר','Liverpool':'ליברפול','Man Utd':'מנצ\'סטר יונייטד','Newcastle':'ניוקאסל','Nottm Forest':'נוטינגהאם פורסט','Southampton':'סאות\'המפטון','Spurs':'טוטנהאם','Sunderland':'סנדרלנד','West Ham':'ווסטהאם','Wolves':'וולבס','Coventry':'קובנטרי','Norwich City':'נוריץ\'','Bradford':'ברדפורד','Hull':'האל','PSG':'פאריס סן ז\'רמן','Barcelona':'ברצלונה','Real Madrid':'ריאל מדריד','Bayern Munich':'באיירן מינכן','Napoli':'נאפולי','Inter Milan':'אינטר','Juventus':'יובנטוס','FC Porto':'פורטו','RB Leipzig':'לייפציג','AEK Athens':'א.א.ק אתונה','Lens':'לאנס','Sporting':'ספורטינג ליסבון','Benfica':'בנפיקה','Dortmund':'דורטמונד','Atletico Madrid':'אתלטיקו מדריד','Atlético Madrid':'אתלטיקו מדריד','Ajax':'אייאקס','Celtic':'סלטיק'};
+const tn=n=>TEAMHE[n]||n,isCity=t=>t&&t.id==='382';
+const gWhen=g=>{const d=new Date(g.date);return {day:DAYS[d.getDay()],date:fD(d.getTime()).split(' ·')[0].slice(0,5),time:`${p2(d.getHours())}:${p2(d.getMinutes())}`,ms:d-Date.now()}};
+const gOpp=g=>isCity(g.home)?g.away:g.home,gHome=g=>isCity(g.home);
+function gRes(g){if(g.state!=='post'||g.home.score==null)return '';const c=+(gHome(g)?g.home.score:g.away.score),o=+(gHome(g)?g.away.score:g.home.score);return c>o?'<span class="badge b-ok">ניצחון</span>':c<o?'<span class="badge b-no">הפסד</span>':'<span class="badge b-wait">תיקו</span>'}
+function gameRow(g){const w=gWhen(g),o=gOpp(g);const cs=gHome(g)?[g.home.score,g.away.score]:[g.away.score,g.home.score];const sc=g.home.score!=null&&g.state!=='pre'?`<span class="v" dir="ltr" title="סיטי–יריבה">${cs[0]}–${cs[1]}</span>`:`<span class="v" dir="ltr">${w.time}</span>`;
+  return `<div class="li"><div class="ic">${o.logo?`<img src="${esc(o.logo)}" alt="" style="width:28px;height:28px;object-fit:contain">`:'⚽'}</div><div class="t"><b>${gHome(g)?'נגד':'אצל'} ${esc(tn(o.name))}</b><small>${w.day} ${w.date} · ${esc(g.comp)}${g.state==='in'?' · <b style="color:var(--lime)">🔴 עכשיו</b>':''}</small></div>${gRes(g)}${sc}</div>`}
+function gameHero(g){const w=gWhen(g),live=g.state==='in';const T=x=>`<div class="gt"><img src="${esc(x.logo||'')}" alt="" onerror="this.style.visibility='hidden'"><b>${esc(tn(x.name))}</b></div>`;
+  return `<div class="bal ghero"><small>${live?'🔴 משחק עכשיו!':'⏭️ המשחק הבא'} · ${esc(g.comp)}</small><div class="gvs">${T(g.home)}<div class="gmid">${live?`<div class="big" dir="ltr" style="font-size:38px">${g.home.score??0}–${g.away.score??0}</div><small>${esc(g.clock||g.detail)}</small>`:`<div class="big" style="font-size:30px">${w.time}</div><small>${w.day} ${w.date}</small>`}</div>${T(g.away)}</div>
+  <div class="sub"><span class="pill">${gHome(g)?'🏟️ בבית':'✈️ בחוץ'}${g.venue?' · '+esc(g.venue):''}</span>${!live&&w.ms>0&&w.ms<7*864e5?`<span class="pill">⏳ ${w.ms<864e5?'היום!':'בעוד '+Math.ceil(w.ms/864e5)+' ימים'}</span>`:''}</div></div>`}
+
 /* ============ schedule ============ */
 const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];let schOff=0,schTab='d',schDraft=[],schBad=[],schSkip=[];
 const toM=s=>{if(!s)return 0;const[h,m]=String(s).split(':').map(Number);return h*60+(m||0)},hm=m=>`${p2(Math.floor(m/60)%24)}:${p2(m%60)}`;
@@ -372,7 +387,7 @@ function boom(){
   const t0=performance.now();(function f(t){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});t-t0<3000?requestAnimationFrame(f):c.remove()})(t0)}
 
 /* ============ nav ============ */
-const NAV=[['home','🏟️','בית'],['tasks','⚽','משימות'],['shop','👕','חנות'],['sched','📅','לו״ז'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
+const NAV=[['home','🏟️','בית'],['tasks','⚽','משימות'],['shop','👕','חנות'],['sched','📅','לו״ז'],['city','💙','סיטי'],['history','📜','היסטוריה'],['bank','🏦','הקופה']];
 function go(r){if(r==='admin'&&!admin){pinGate();return}route=r;render();scrollTo(0,0)}
 function renderNav(){$('#nav').innerHTML=NAV.map(([k,i,t])=>`<button class="${route===k?'on':''}" data-go="${k}"><span>${i}</span>${t}</button>`).join('');
   $('#chip').innerHTML=admin?`<button data-act="lock">🔓 מצב אבא פעיל · לחץ לנעילה</button>`:''}
@@ -410,6 +425,10 @@ sched(){const today=new Date(),wd=today.getDay();
   ${schTab==='d'?`<h2>${DAYS[wd]} · ${fD(today.getTime()).split(' ·')[0]}</h2>${tl.length?`<div class="list">${rows}</div>`:'<div class="list"><div class="empty">אין כלום היום. יום חופשי! 😎</div></div>'}`
   :(()=>{const s0=schOff*7,a=new Date(today.getFullYear(),today.getMonth(),today.getDate()+s0),z=new Date(a.getFullYear(),a.getMonth(),a.getDate()+6),f=x=>fD(x.getTime()).split(' ·')[0].slice(0,5);
     return `<div class="month" style="margin-bottom:6px"><button class="arr" data-act="schoff" data-k="-1" ${schOff<=0?'style="opacity:.25"':''} aria-label="קודם">›</button><div class="ml"><b>${schOff===0?'7 הימים הקרובים':schOff===1?'השבוע שאחרי':`בעוד ${schOff} שבועות`}</b><small>${f(a)} – ${f(z)}</small></div><button class="arr" data-act="schoff" data-k="1" aria-label="הבא">‹</button></div>`})()+[0,1,2,3,4,5,6].map(i=>{i+=schOff*7;const d=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i),L=evsOn(d);return `<h2 ${i===0?'style="color:var(--lime)"':''}>${i===0?'⭐ היום · ':i===1?'מחר · ':''}${DAYS[d.getDay()]} · ${fD(d.getTime()).split(' ·')[0].slice(0,5)}${L.length?'':' <small style="opacity:.6;font-weight:400">· פנוי</small>'}</h2>${L.length?evList(L,false):''}`}).join('')}`},
+city(){if(!CITY||Date.now()-CITY.t>6e5)cityLoad();if(!CITY)return `<h1 class="page">המשחקים של סיטי 💙</h1><div class="list"><div class="empty">${CITYERR?'לא הצלחתי לטעון את המשחקים. בדוק אינטרנט 🙃':'טוען משחקים... ⚽'}</div></div>`;
+  const G=CITY.games,up=G.filter(g=>g.state!=='post'),past=G.filter(g=>g.state==='post').reverse(),nx=up[0];
+  return `<h1 class="page">המשחקים של סיטי 💙</h1>${nx?gameHero(nx):''}<h2>📅 המשחקים הבאים</h2>${up.length>1?`<div class="list">${up.slice(1,9).map(gameRow).join('')}</div>`:'<div class="list"><div class="empty">אין עוד משחקים בלו״ז</div></div>'}
+  <h2>✅ תוצאות אחרונות</h2>${past.length?`<div class="list">${past.slice(0,8).map(gameRow).join('')}</div>`:''}<div class="note" style="text-align:center;margin-top:10px">פרמייר ליג, ליגת האלופות וגביעים · מקור: ESPN</div>`},
 bank(){const mb=monthBtn('bank',S.money,'₪');
   return `<h1 class="page">הקופה אצל אבא 🏦</h1>
   <div class="bal" style="margin-bottom:12px"><small>הכסף שלי אצל אבא</small><div class="big">₪${fN(CASH())}</div><div class="sub"><span class="pill">שער: ${fN(S.ratio)} נק' = ₪1</span><span class="pill">⚡ ${fN(PTS())} נק' = ₪${fN(toCash(PTS()))}</span></div></div>
