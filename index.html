@@ -107,7 +107,7 @@ h2{font-size:16px;margin:18px 2px 8px;color:var(--mut);font-weight:500}
 .li.ev.past{opacity:.45}.li.ev.now{background:#6cabdd22;box-shadow:inset 3px 0 0 var(--lime)}
 .reader p{font-size:17px;line-height:1.75;margin:0 0 14px}.reader .ri{font-size:40px;text-align:center}.reader h3{margin-left:0;text-align:center}
 .ghero{margin-bottom:6px}.gvs{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin:8px 0}.gt{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px}.gt img{width:52px;height:52px;object-fit:contain}.gmid{text-align:center}
-.promo .pc{text-align:center;padding:4px 0 10px}.promo .pc+.pc{border-top:1px dashed var(--line);padding-top:14px}.promo .pf{font-size:54px;animation:pulse 1.6s infinite}.promo h3{margin:4px 0 8px;text-align:center}.promo .pd{font-size:17px;line-height:1.6;margin-bottom:6px}.promo .pd b{color:var(--orange);font-size:20px}
+.promo .pc{text-align:center;padding:4px 0 10px}.promo .pc+.pc{border-top:1px dashed var(--line);padding-top:14px}.promo .pf{font-size:54px;animation:pulse 1.6s infinite;pointer-events:none}.md .x{z-index:5}.promo h3{margin:4px 0 8px;text-align:center}.promo .pd{font-size:17px;line-height:1.6;margin-bottom:6px}.promo .pd b{color:var(--orange);font-size:20px}
 .card.hot{border-color:var(--orange);box-shadow:0 0 0 3px #ffc84522}
 .pitch{position:relative;width:100%;aspect-ratio:4/3.4;border-radius:16px;overflow:hidden;margin:6px 0 4px;background:repeating-linear-gradient(180deg,#2f8b3c 0 28px,#287c34 28px 56px);touch-action:manipulation}
 .pitch .goal{position:absolute;top:7%;left:9%;width:82%;height:42%;border:5px solid #fff;border-bottom:0;border-radius:4px 4px 0 0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);box-shadow:0 6px 0 -3px #ffffff55}
@@ -345,11 +345,11 @@ function promoPv(P){const opts=[[`task:__read`,'💡 רגע של עניין'],..
   <button class="btn pri" data-act="prsave">✅ הפעל מבצע</button></div>`;
   ['#pr_t','#pr_y','#pr_v'].forEach(q=>$(q).addEventListener('change',()=>{const[k,id]=$('#pr_t').value.split(':');$('#pr_h').value=promoHead({kind:k,tid:id,type:$('#pr_y').value,val:num($('#pr_v').value)})}))}
 // עד פעמיים ביום לכל מבצע: פעם לפני 14:00 ופעם אחרי
-function promoPop(){if(admin)return;const k=dayKey()+(new Date().getHours()<14?'a':'b');let seen={};try{seen=JSON.parse(localStorage.getItem('ben-promo-seen')||'{}')}catch(e){}
-  const L=S.promos.filter(x=>promoState(x)==='on'&&promoTarget(x)&&seen[x.id]!==k);if(!L.length)return;L.forEach(x=>seen[x.id]=k);try{localStorage.setItem('ben-promo-seen',JSON.stringify(seen))}catch(e){}
+function promoPop(preview){if(admin&&!preview)return;const k=dayKey()+(new Date().getHours()<14?'a':'b');let seen={};try{seen=JSON.parse(localStorage.getItem('ben-promo-seen')||'{}')}catch(e){}
+  const L=S.promos.filter(x=>promoState(x)==='on'&&promoTarget(x)&&(preview||seen[x.id]!==k));if(!L.length){if(preview)alertBox('אין כרגע מבצע פעיל','🤷');return}if(!preview){L.forEach(x=>seen[x.id]=k);try{localStorage.setItem('ben-promo-seen',JSON.stringify(seen))}catch(e){}}
   const ov=modal(`<div class="promo">${L.map(x=>{const tg=promoTarget(x),isT=x.kind==='task';const rg=S.surprises.map(s=>num(s.pts)).filter(v=>v>0),lo=Math.min(...rg),hi=Math.max(...rg),isR=tg.id==='__read';const was=isR?`${lo}–${hi}`:num(tg.pts),now=isR?`${taskPtsP(tg,lo)}–${taskPtsP(tg,hi)}`:isT?taskPtsP(tg,num(tg.pts)):priceP(tg);
     return `<div class="pc"><div class="pf">🔥</div><h3>${esc(x.head)}</h3><div class="pd">${tg.icon} ${esc(tg.name)}<br>${isT?`במקום <s dir="ltr">${isR?was:fN(was)}</s> ← <b dir="ltr">${isR?now:fN(now)}</b> <b>נק'</b>`:`במקום <s dir="ltr">${isR?was:fN(was)}</s> ← <b dir="ltr">${isR?now:fN(now)}</b> <b>נק'</b>`}${tg.unit?' ל'+esc(tg.unit):''}</div><div class="note" style="text-align:center">⏳ עד ${promoUntil(x)}</div>
-    <button class="btn ${isT?'pri':'cy'}" data-act="prgo" data-k="${x.kind}">${isT?'⚽ למשימות':'🛒 לחנות'}</button></div>`}).join('')}</div>`,{center:true});boom()}
+    <button class="btn ${isT?'pri':'cy'}" data-act="prgo" data-k="${x.kind}" ${admin?'disabled style="opacity:.5"':''}>${isT?'⚽ למשימות':'🛒 לחנות'}</button></div>`}).join('')}</div>`,{center:true});boom()}
 
 /* ============ man city games ============ */
 let CITY=null,CITYERR=false,cityBusy=false;
@@ -522,7 +522,7 @@ admin(){const pend=S.requests.filter(x=>x.status==='pending').length;
   if(adminTab==='promo'){const L=S.promos.slice().sort((a,b)=>b.created-a.created);
     body=`<div class="note">תאר את המבצע במילים שלך, ואני אהפוך אותו למבצע. דוגמאות:<br><span style="color:var(--cyan)">הוצאה של אולי שווה כפול עד יום שישי<br>30% הנחה על GTA 7 עד סוף השבוע<br>בונוס 5 נקודות על משחק שחמט רק היום<br>הסעה בשעה רגילה ב-5 נקודות עד 30/11</span></div>
     <div class="fld"><textarea id="prtx" rows="3" placeholder="מה המבצע?"></textarea></div><button class="btn pri" data-act="prparse">🪄 צור מבצע</button><div id="prpv"></div>
-    <h2>🔥 המבצעים</h2>${L.length?`<div class="list">${L.map(x=>{const st=promoState(x),tg=promoTarget(x);return `<div class="li"><div class="ic">${tg?tg.icon:'❓'}</div><div class="t"><b style="white-space:normal">${esc(x.head)}</b><small>${tg?esc(tg.name):'הפריט נמחק'} · ${promoTxt(x)} · עד ${promoUntil(x)}</small></div><span class="badge ${st==='on'?'b-ok':st==='soon'?'b-wait':'b-no'}">${st==='on'?'פעיל':st==='soon'?'בקרוב':'נגמר'}</span><div class="acts"><button data-act="prdel" data-id="${x.id}">🗑️</button></div></div>`}).join('')}</div>`:'<div class="list"><div class="empty">אין מבצעים עדיין</div></div>'}`}
+    <h2>🔥 המבצעים</h2>${S.promos.some(x=>promoState(x)==='on')?`<button class="btn" style="margin-bottom:10px" data-act="prview">👀 הצג לי את הפופאפ עכשיו</button>`:''}${L.length?`<div class="list">${L.map(x=>{const st=promoState(x),tg=promoTarget(x);return `<div class="li"><div class="ic">${tg?tg.icon:'❓'}</div><div class="t"><b style="white-space:normal">${esc(x.head)}</b><small>${tg?esc(tg.name):'הפריט נמחק'} · ${promoTxt(x)} · עד ${promoUntil(x)}</small></div><span class="badge ${st==='on'?'b-ok':st==='soon'?'b-wait':'b-no'}">${st==='on'?'פעיל':st==='soon'?'בקרוב':'נגמר'}</span><div class="acts"><button data-act="prdel" data-id="${x.id}">🗑️</button></div></div>`}).join('')}</div>`:'<div class="list"><div class="empty">אין מבצעים עדיין</div></div>'}`}
   if(adminTab==='settings'){body=`<div class="list" style="padding:14px">
     <div class="fld"><label>📱 תאריך יום ההולדת ה-14 של בן (לחישוב הטיקטוק)</label><input id="tt14" type="date" value="${esc(S.tiktok14||'')}"></div><div class="note" style="margin-top:-6px">המרה: 1 נק' = ₪1, בשני הכיוונים (נקודות ⇄ כסף).</div>
     <div class="fld"><label>קוד אבא (PIN)</label><input id="pin" inputmode="numeric" value="${esc(S.pin)}"></div>
@@ -657,6 +657,7 @@ document.addEventListener('click',e=>{
     if(!f||!u||u<f){alertBox('בדוק את התאריכים','📅');break}if(y==='mult'&&v<=1||y==='disc'&&(v<=0||v>100)||y==='bonus'&&v<=0||y==='price'&&v<0){alertBox('בדוק את המספר X','⚠️');break}
     S.promos.push({id:uid(),kind:k,tid:id,type:y,val:v,from:f,until:u,head:$('#pr_h').value.trim()||promoHead({kind:k,tid:id,type:y,val:v}),created:Date.now()});save();render();alertBox('המבצע נשמר 🔥 בן יראה אותו בכניסה הבאה','✅','סגור');break}
   case'prdel':{const x=S.promos.find(y=>y.id===id);if(x)ask(`למחוק את המבצע "${x.head}"?`,()=>{S.promos=S.promos.filter(y=>y.id!==id);save();render()},'כן, מחק');break}
+  case'prview':promoPop(true);break;
   case'prgo':{document.querySelectorAll('.ov').forEach(o=>o.remove());if(b.dataset.k==='task'){go('tasks');taskPick()}else go('shop');break}
   case'schtab':schTab=b.dataset.k;schOff=0;render();break;
   case'schoff':schOff=Math.max(0,Math.min(52,schOff+num(b.dataset.k)));render();scrollTo(0,0);break;
